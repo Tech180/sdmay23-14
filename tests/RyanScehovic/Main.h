@@ -16,5 +16,8 @@
 #include <openssl/err.h> /* errors */
 #include <openssl/ssl.h> /* core library */
 #include <openssl/evp.h>
+#include <openssl/aes.h>
+#include <openssl/rsa.h>
+#include <openssl/x509.h>
 
 #endif /* MAIN_H_ */
