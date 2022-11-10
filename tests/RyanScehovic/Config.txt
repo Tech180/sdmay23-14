@@ -1,0 +1,25 @@
+Setup guide: 
+
+1. Open VMware Horizon Client
+2. Select 'Engineering Linux'
+3. download 'openssl-1.1.1s.tar.gz' from https://github.com/openssl/openssl 
+4. unzip tar.gz from step 3 and open folder
+    - directions used from openssl zip:
+        - config.com
+	- INSTALL
+5. once inside, right click in folder and select 'Open in Terminal'
+6. Run './config --prefix=/home/scehovic/desktop --openssldir=/home/scehovic/desktop'
+7. Run 'make install'
+
+code from Main.h and Main.c on gitlab 'https://git.ece.iastate.edu/sd/sdmay23-14' inside the folders tests -> Ryan Scehovic
+
+
+other links: 
+https://github.com/openssl/openssl 
+
+
+
+unsigned char text2[69];
+ // printf("\nline %d read in: %s \n", cycle, line );
+       //strcpy(text2, line);
+       // printf("text2: %s \n", text );
