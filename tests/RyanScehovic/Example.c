@@ -1,5 +1,9 @@
 #include "Main.h"
 
+/**
+ * We're assuming we get the key, so for now, we'll use this
+ **/
+
 static const unsigned char key[] = {
     0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
     0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff,
@@ -25,14 +29,24 @@ int main(int argc, char *argv[]){
     ssize_t read;
     unsigned char lineFromFile[70];
     unsigned char canData[128]; //readLine
-
-  // 4. read in first line from file & copy it into array
-    read = getline(&line, &len, testDataFile);
-    strcpy(lineFromFile, line);
-    printf("read = %d", read); //count of how much was read from file
-
-  // 5. identifies start off message to encrypt & breaks when it finds it
+    int counter = 0;
     int startingPoint;
+    int positionInFrame;
+    int indexLineFromFile = 0;
+
+    unsigned char enc_out[128];
+    unsigned char dec_out[17];
+
+    AES_KEY enc_key, dec_key;
+
+    int c;
+
+    while((read = getline(&line, &len, testDataFile) != -1) && counter < 3) {
+  // 4. read in first line from file & copy it into array
+    strcpy(lineFromFile, line);
+  
+  // 5. identifies start off message to encrypt & breaks when it finds it
+
     for(startingPoint=0; lineFromFile[startingPoint]!='\0' ; startingPoint++){
       if(lineFromFile[startingPoint] == 'd' && lineFromFile[startingPoint+2] == '8'){
 	startingPoint+= 4;
@@ -41,8 +55,7 @@ int main(int argc, char *argv[]){
     }
 
   // 6. gets 16 digits to encrypt
-    int positionInFrame;
-    int indexLineFromFile = 0;
+    indexLineFromFile = 0;
     for(positionInFrame=startingPoint; lineFromFile[positionInFrame]!='\0'; positionInFrame++){
       if(lineFromFile[positionInFrame] != ' '){
 	canData[indexLineFromFile]=lineFromFile[positionInFrame];
@@ -51,10 +64,6 @@ int main(int argc, char *argv[]){
     }
 
   // 7. declare variables for encryption/decryption process
-    unsigned char enc_out[128];
-    unsigned char dec_out[17];
-
-    AES_KEY enc_key, dec_key;
 
     AES_set_encrypt_key(key, 128, &enc_key);
     AES_encrypt(canData, enc_out, &enc_key);      
@@ -64,7 +73,7 @@ int main(int argc, char *argv[]){
 
 
     printf("\n canData:   ");
-    int c;
+ 
     for(c=0; canData[c] != '\0'; c++){
       printf("%c", canData[c]);
     }
@@ -79,6 +88,10 @@ int main(int argc, char *argv[]){
       printf("%c", dec_out[c]);
     }
     printf("\n");
+   
+    counter+=1;
+    memset(lineFromFile, 0, 70);
+    }//end of while loop
 
     return 0;
 }
