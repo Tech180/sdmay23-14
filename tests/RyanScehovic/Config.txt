@@ -16,10 +16,3 @@ code from Main.h and Main.c on gitlab 'https://git.ece.iastate.edu/sd/sdmay23-14
 
 other links: 
 https://github.com/openssl/openssl 
-
-
-
-unsigned char text2[69];
- // printf("\nline %d read in: %s \n", cycle, line );
-       //strcpy(text2, line);
-       // printf("text2: %s \n", text );
