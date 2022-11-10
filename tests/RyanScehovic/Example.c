@@ -8,50 +8,51 @@ static const unsigned char key[] = {
 };
 
 int main(int argc, char *argv[]){
+
+  // 1. locate file & open with read permission
     FILE *testDataFile;
      testDataFile = fopen("../../CAN_log_files/Sept 13th Files/Full_CAN_Bus_Log.asc", "r");
 
+  // 2. make sure file was found
      if(testDataFile == NULL){
        printf("couldn't make it to file :(");
        return;
      }
 
-    char * line = NULL;
+  // 3. define variables for encryption/decryption process
+    char *line = NULL;
     size_t len = 0;
     ssize_t read;
-    unsigned char lineFromFile[68];
-    unsigned char canData[24];
+    unsigned char lineFromFile[70];
+    unsigned char canData[128]; //readLine
+
+  // 4. read in first line from file & copy it into array
     read = getline(&line, &len, testDataFile);
     strcpy(lineFromFile, line);
+    printf("read = %d", read); //count of how much was read from file
 
-    // printf("\n line from file = %s", lineFromFile);
-    int a;
-    int b=0;
-
-    //identifies start off message to encrypt
-    for(a=0; a < 70; a++){
-      if(lineFromFile[a] == 'd' && lineFromFile[a+2] == '8'){
-	a+= 4;
-	//printf("\nstarting char: %c %c\n", lineFromFile[a], lineFromFile[67]);
+  // 5. identifies start off message to encrypt & breaks when it finds it
+    int startingPoint;
+    for(startingPoint=0; lineFromFile[startingPoint]!='\0' ; startingPoint++){
+      if(lineFromFile[startingPoint] == 'd' && lineFromFile[startingPoint+2] == '8'){
+	startingPoint+= 4;
 	break;
       }
     }
-    int z;
-    for(z=a; lineFromFile[z]!='\0'; z++){
-      canData[b]=lineFromFile[z];
-      b++;
-      //printf("%c\n", lineFromFile[z]);
-    }    
-    int x;
-    //    for(x=0; x<24; x++)
-    // {
-	//	printf("%c", canData[x]);
-	//     }
-	// printf("\n");
-    
-    unsigned char text[]="hello world!";
-    unsigned char enc_out[80];
-    unsigned char dec_out[80];
+
+  // 6. gets 16 digits to encrypt
+    int positionInFrame;
+    int indexLineFromFile = 0;
+    for(positionInFrame=startingPoint; lineFromFile[positionInFrame]!='\0'; positionInFrame++){
+      if(lineFromFile[positionInFrame] != ' '){
+	canData[indexLineFromFile]=lineFromFile[positionInFrame];
+        indexLineFromFile++;
+      }
+    }
+
+  // 7. declare variables for encryption/decryption process
+    unsigned char enc_out[128];
+    unsigned char dec_out[17];
 
     AES_KEY enc_key, dec_key;
 
@@ -61,26 +62,23 @@ int main(int argc, char *argv[]){
     AES_set_decrypt_key(key,128,&dec_key);
     AES_decrypt(enc_out, dec_out, &dec_key);
 
-    //  int i;
 
+    printf("\n canData:   ");
+    int c;
+    for(c=0; canData[c] != '\0'; c++){
+      printf("%c", canData[c]);
+    }
 
-    printf("\ncanData string: %s\n", canData);
-    printf("\nencrypted:\t %s", enc_out);
-    printf("\n\ndecrypted:\t %s\n", dec_out);
+    printf(" encrypted: ");
+    for(c=0; enc_out[c] != '\0'; c++){
+      printf("%c", enc_out[c]);
+    }
 
-    
-
-
-    //printf("\noriginal:\t");
-    //for(i=0;*(canData+i)!=0x00;i++)
-    // printf("%X ",*(canData+i));
-    // printf("\n\nencrypted:\t");
-    //for(i=0;*(enc_out+i)!=0x00;i++)
-    // printf("%X ",*(enc_out+i));
-    // printf("\n\ndecrypted:\t");
-    //for(i=0;*(dec_out+i)!=0x00;i++)
-    // printf("%X ",*(dec_out+i));
-    //printf("\n");
+    printf("\n decrypted: "); //get a weird character when doing dec_out[c] != '\0' but not when c<16
+    for(c=0; dec_out[c] != '\0'; c++){
+      printf("%c", dec_out[c]);
+    }
+    printf("\n");
 
     return 0;
-} 
+}
