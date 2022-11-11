@@ -41,56 +41,56 @@ int main(int argc, char *argv[]){
 
     int c;
 
-    while((read = getline(&line, &len, testDataFile) != -1) && counter < 3) {
-  // 4. read in first line from file & copy it into array
-    strcpy(lineFromFile, line);
+    while((read = getline(&line, &len, testDataFile) != -1)) {
+      // 4. read in first line from file & copy it into array
+      strcpy(lineFromFile, line);
   
-  // 5. identifies start off message to encrypt & breaks when it finds it
-
-    for(startingPoint=0; lineFromFile[startingPoint]!='\0' ; startingPoint++){
-      if(lineFromFile[startingPoint] == 'd' && lineFromFile[startingPoint+2] == '8'){
-	startingPoint+= 4;
-	break;
+      // 5. identifies start off message to encrypt & breaks when it finds it
+      for(startingPoint=0; lineFromFile[startingPoint]!='\0' ; startingPoint++){
+	if(lineFromFile[startingPoint] == 'd' && lineFromFile[startingPoint+2] == '8'){
+	  startingPoint+= 4;
+	  break;
+	}
       }
-    }
 
-  // 6. gets 16 digits to encrypt
-    indexLineFromFile = 0;
-    for(positionInFrame=startingPoint; lineFromFile[positionInFrame]!='\0'; positionInFrame++){
-      if(lineFromFile[positionInFrame] != ' '){
-	canData[indexLineFromFile]=lineFromFile[positionInFrame];
-        indexLineFromFile++;
+      // 6. gets 16 digits to encrypt
+      indexLineFromFile = 0;
+      for(positionInFrame=startingPoint; lineFromFile[positionInFrame]!='\0'; positionInFrame++){
+	if(lineFromFile[positionInFrame] != ' '){
+	  canData[indexLineFromFile]=lineFromFile[positionInFrame];
+	  indexLineFromFile++;
+	}
       }
-    }
 
-  // 7. declare variables for encryption/decryption process
+      // 7. declare variables for encryption/decryption process
 
-    AES_set_encrypt_key(key, 128, &enc_key);
-    AES_encrypt(canData, enc_out, &enc_key);      
+      AES_set_encrypt_key(key, 128, &enc_key);
+      AES_encrypt(canData, enc_out, &enc_key);      
 
-    AES_set_decrypt_key(key,128,&dec_key);
-    AES_decrypt(enc_out, dec_out, &dec_key);
+      AES_set_decrypt_key(key,128,&dec_key);
+      AES_decrypt(enc_out, dec_out, &dec_key);
 
+      // 8. print out the line of CAN data, encrypted text, and decrypted text
+      printf("\n canData:   ");
+      for(c=0; canData[c] != '\0'; c++){
+	//usleep(100);
+	printf("%c", canData[c]);
+      }
 
-    printf("\n canData:   ");
- 
-    for(c=0; canData[c] != '\0'; c++){
-      printf("%c", canData[c]);
-    }
-
-    printf(" encrypted: ");
-    for(c=0; enc_out[c] != '\0'; c++){
-      printf("%c", enc_out[c]);
-    }
-
-    printf("\n decrypted: "); //get a weird character when doing dec_out[c] != '\0' but not when c<16
-    for(c=0; dec_out[c] != '\0'; c++){
-      printf("%c", dec_out[c]);
-    }
-    printf("\n");
+      printf(" encrypted: ");
+      for(c=0; enc_out[c] != '\0'; c++){
+	//usleep(100);
+	printf("%c", enc_out[c]);
+      }
+      // dec_out[c] != '\0'
+      printf("\n decrypted: "); //get a weird character when doing dec_out[c] != '\0' but not when c<16 
+      for(c=0; c<16; c++){
+	//usleep(100);
+	printf("%c", dec_out[c]);
+      }
+      printf("\n--------- End Of Line %d ---------\n", counter);
    
-    counter+=1;
-    memset(lineFromFile, 0, 70);
+      counter+=1;
     }//end of while loop
 
     return 0;
