@@ -46,6 +46,9 @@ int main(int argc, char *argv[]){
       strcpy(lineFromFile, line);
   
       // 5. identifies start off message to encrypt & breaks when it finds it
+      //first line of file: 4410.000868 1     18FFFA13x        Rx    d 8 00 14 FF 3F FF FF FF FF
+      //from that first line, this loop identifies the 'd 8' and then adds 4 which is where the 
+      //     16 digits start
       for(startingPoint=0; lineFromFile[startingPoint]!='\0' ; startingPoint++){
 	if(lineFromFile[startingPoint] == 'd' && lineFromFile[startingPoint+2] == '8'){
 	  startingPoint+= 4;
