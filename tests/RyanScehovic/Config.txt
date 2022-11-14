@@ -9,7 +9,7 @@ Setup guide:
 4. unzip tar.gz from step 3 and open folder
     - directions used from unzipped openssl folder:
         - config.com
-	    - INSTALL
+        - INSTALL
 5. once inside, right click in folder and select 'Open in Terminal'
 6. Run './config --prefix=/home/scehovic/desktop --openssldir=/home/scehovic/desktop' 
     *note: change 'scehovic' to whatever the username is on the linux machine
