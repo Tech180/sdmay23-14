@@ -65,7 +65,7 @@ int main(int argc, char *argv[]){
 	}
       }
 
-      // 7. declare variables for encryption/decryption process
+      // 7. set encyption/decryption keys and call encryption/decryption functions
 
       AES_set_encrypt_key(key, 128, &enc_key);
       AES_encrypt(canData, enc_out, &enc_key);      
