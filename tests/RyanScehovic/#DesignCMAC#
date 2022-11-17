@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
   CMAC_Final(ctx, mact, &mactlen);
 
   printBytes(mact, mactlen);
-  /* expected result T = 07 0a 16 b4 6b 4d 41 44 f7 9b dd 9d d0 4a 28 7c */
+  /* expected result T = 070a16b4 6b4d4144 f79bdd9d d04a287c */
 
   CMAC_CTX_free(ctx);
   return 0;
