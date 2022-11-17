@@ -15,8 +15,8 @@ Setup guide:
     *note: change 'scehovic' to whatever the username is on the linux machine
 7. Run 'make install'
 -------this is the end of installing OpenSSL----------
-8. to compile Example.c run: gcc -o Example Example.c -lssl -lcrypto
-9. to run Example.c file: ./Example
+8. to compile InitialDesign.c run: gcc -o InitialDesign InitialDesign.c -lssl -lcrypto
+9. to run InitialDesign.c file: ./InitialDesign
 
 code from  'https://git.ece.iastate.edu/sd/sdmay23-14' inside the folders tests -> Ryan Scehovic
 
