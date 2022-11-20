@@ -13,6 +13,11 @@ static const unsigned char key[] = {
 
 int main(int argc, char *argv[]){
 
+  // note for the future (from thinking about bridges) - consider if statement at the top to determine
+  //    if sending / receiving to determine if it needs to encrypt vs decrypt
+  //       could try to have 2 programs communicate with each other
+
+
   // 1. locate file & open with read permission
     FILE *testDataFile;
      testDataFile = fopen("../../CAN_log_files/Sept 13th Files/Full_CAN_Bus_Log.asc", "r");
@@ -83,7 +88,7 @@ int main(int argc, char *argv[]){
       printf(" encrypted: ");
       for(c=0; enc_out[c] != '\0'; c++){
 	//usleep(100);
-	printf("%c", enc_out[c]);
+	printf("%x", enc_out[c]);
       }
       // dec_out[c] != '\0'
       printf("\n decrypted: "); //get a weird character when doing dec_out[c] != '\0' but not when c<16 
