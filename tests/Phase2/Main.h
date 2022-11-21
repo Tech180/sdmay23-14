@@ -14,4 +14,6 @@
 #include <openssl/rsa.h>
 #include <openssl/x509.h>
 
+extern void passLineFromFile(char line[], int count);
+
 #endif /* MAIN_H_ */

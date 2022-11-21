@@ -49,8 +49,9 @@ void main(int argc, char *argv[]) {
        //checking that types are equal -
       //if the parameter to main is '00x' and the line of the file has '00x' they are both engine 
       if(strcmp(ECU_type, lineType)==0){ 
-	printf("\npassed if statement \n ");
-	printf("line %d: %c%c%c  \n", counter, lineFromFile[24], lineFromFile[25], lineFromFile[26]);
+	//printf("\npassed if statement \n ");
+	//printf("line %d: %c%c%c  \n", counter, lineFromFile[24], lineFromFile[25], lineFromFile[26]);
+	passLineFromFile(lineFromFile, counter);
       }
     }   
     fclose(testDataFile);

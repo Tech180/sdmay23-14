@@ -1,42 +1,23 @@
-/#include "Main.h"
+#include "Main.h"
 
+ //assuming we get the key
 static const unsigned char key[] = {    
 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,    
 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff,     
 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,     
 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f };
 
-void main(int argc, char *argv[]) {   
+/**
+ * method takes in line and lineNumber from function call in ECU.c and then prints it
+ **/
+void passLineFromFile(char line[], int count){
+  int idx;
+  printf("\nline %d: ", count);
+  for(idx=0; idx<70; idx++){
+    printf("%c", line[idx]);
+  }
 
-    unsigned char enc_out[80];      
-    unsigned char dec_out[80];  
-    AES_KEY enc_key, dec_key;  
-    int i;
-    int cycle = 0;
-
-    while((read = getline(&line, &len, testDataFile)) != -1 && cycle<3){
-        cycle++;
-        AES_set_encrypt_key(key, 128, &enc_key);      
-        AES_encrypt(read, enc_out, &enc_key);       
-        AES_set_decrypt_key(key,128,&dec_key);      
-        AES_decrypt(enc_out, dec_out, &dec_key);       
-
-        printf("original:\t");      
-     
-        for(i=0;(read+i)!=0x00;i++)       
-	        printf("%X ",(read+i)); 
-     
-        printf("\nencrypted:\t");      
-        for(i=0;*(enc_out+i)!=0x00;i++)          
-	        printf("%X ",*(enc_out+i));      
-
-        printf("\ndecrypted:\t");      
-        for(i=0;*(dec_out+i)!=0x00;i++)          
-	        printf("%X ",(dec_out+i));      
-
-       printf("\n----------- end of %d cycle ------------- \n  \n  \n", cycle);
-     }   
-
-     
+  return;
 }
+
 
