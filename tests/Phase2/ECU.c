@@ -1,5 +1,10 @@
 #include "Main.h"
 
+/**
+ * Overview: takes in a parameter (ex: ./ECU 00x) where the 00x represents 
+ * the ECU type. Every line from the file that has a matching ECU type
+ * will be printed.
+ **/
 void main(int argc, char *argv[]) {
     char *ECU_type;
     int a;
@@ -31,7 +36,8 @@ void main(int argc, char *argv[]) {
     int counter=0;
     int z;
 
-    //prints out all the lines where the main parameter (ex: 00x) is the same type as the line in the file
+    //prints out all the lines where the main parameter (ex: 00x) 
+    // is the same type as the identifier from the line in the file
     while((read = getline(&line, &len, testDataFile)) != -1){
       counter++;
       strcpy(lineFromFile, line);
@@ -48,5 +54,4 @@ void main(int argc, char *argv[]) {
       }
     }   
     fclose(testDataFile);
-     
 }
