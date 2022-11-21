@@ -14,6 +14,7 @@ Main.h:
 
 ECU.c: 
 - simulates an ECU (makes call to function in Bridge.c for each line where parameter passed in matches line from file)
+- delays between each call to Bridge.c by whatever the difference of time stamps are between current and last lines from file with the matching ECU type (ex: line 1: 123 ... 00x, line 2: 223 ... 00x = 100)
 
 Bridge.c 
 - simulates Bridge (encrypt/decrypt, build CAN fd frames, etc)

@@ -20,4 +20,5 @@ void passLineFromFile(char line[], int count){
   return;
 }
 
+//next add on encryption/decryption for each line passed in
 

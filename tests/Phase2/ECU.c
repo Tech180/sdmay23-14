@@ -1,9 +1,12 @@
 #include "Main.h"
 
 /**
- * Overview: takes in a parameter (ex: ./ECU 00x) where the 00x represents 
- * the ECU type. Every line from the file that has a matching ECU type
- * will be printed.
+ * Overview: 
+ * 1) takes in a parameter (ex: ./ECU 00x) where the 00x represents 
+ *    the ECU type. Every line from the file that has a matching ECU type
+ *    will be printed.
+ * 2) uses difference of time stamps (from one 00x file line to the next 00x file line)
+ *    in a usleep() call to delay the calls to Bridge.c to make it more realistic
  **/
 void main(int argc, char *argv[]) {
     char *ECU_type;
@@ -35,6 +38,11 @@ void main(int argc, char *argv[]) {
     char type[4];
     int counter=0;
     int z;
+    double lastTime = 0.0;
+    double currentTime = 0.0;
+    char *timePtr;
+    double sleepTime = 0.0;
+    int toSleep = 0;
 
     //prints out all the lines where the main parameter (ex: 00x) 
     // is the same type as the identifier from the line in the file
@@ -46,12 +54,22 @@ void main(int argc, char *argv[]) {
       type[3]= '\0';
       lineType = &type[0]; //set pointer to start of type array (so that we can use strcmp()
 
-       //checking that types are equal -
+       //checking that types are equal
       //if the parameter to main is '00x' and the line of the file has '00x' they are both engine 
       if(strcmp(ECU_type, lineType)==0){ 
 	//printf("\npassed if statement \n ");
 	//printf("line %d: %c%c%c  \n", counter, lineFromFile[24], lineFromFile[25], lineFromFile[26]);
+	currentTime = strtod(lineFromFile, &timePtr);
+
+	if(lastTime > 0.0){
+	  sleepTime = currentTime-lastTime;
+	  toSleep = sleepTime * 1000000;
+	  printf("\n current time: %lf  last time: %lf  toSleep: %d", currentTime, lastTime, toSleep);
+	  usleep(toSleep);//use times to add in some delay to make simulation more realistic
+	}
 	passLineFromFile(lineFromFile, counter);
+
+	lastTime = currentTime;
       }
     }   
     fclose(testDataFile);
