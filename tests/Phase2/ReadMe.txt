@@ -7,7 +7,7 @@ Main.h:
 - all the imports
 
 ECU.c: 
-- simulates an ECU (currently prints all lines from file where parameter passed in matches line from file)
+- simulates an ECU (makes call to function in Bridge.c for each line where parameter passed in matches line from file)
 
 Bridge.c 
 - simulates Bridge (encrypt/decrypt, build CAN fd frames, etc)
