@@ -29,7 +29,7 @@ all: $(EXE)
 
 # This will link the executable from the object files
 $(EXE): $(OBJECTS)
-    $(LD) $(LDFLAGS) $(OBJECTS) -o  $(EXE) $(LIBS)
+    $(LD) $(LDFLAGS) $(OBJECTS) -o $(EXE) $(LIBS)
 
 # This is a target that will compiler all needed source files into object files
 # We don't need to specify a command or any rules, "make" will handle it automatically
