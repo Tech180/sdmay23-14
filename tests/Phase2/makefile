@@ -41,5 +41,5 @@ clean:
     -rm -f $(OBJECTS)  # Remove the object files
 
 # Finally we need to tell "make" what source and header file each object file depends on
-hellomain.o: hellomain.c helloheader.h
-hellofunc.o: hellofunc.c helloheader.h
+Bridge.o: Bridge.c main.h
+ECU.o: ECU.c main.h
