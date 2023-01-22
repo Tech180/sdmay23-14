@@ -41,6 +41,7 @@ void run(char* argv[])
     };
 
     unsigned char out[16];
+    unsigned char out2[16];
 
     printf("%sInput message%s\n", ACCENTCOLOR, DEFAULT);
     printf("\"%s\"\n", message);
@@ -52,6 +53,10 @@ void run(char* argv[])
     
     verify_mac(message, strlen((char*)message), (unsigned char*)out, key);
 
+    aes_128_decrypt(out, out2, key);
+    printf("\n%sAES-128-CMAC Decrypted%s\n", ACCENTCOLOR, DEFAULT);
+    print_bytes(out2, 16);
+    
     // unsigned int n = 0;
     // unsigned char* C;
 

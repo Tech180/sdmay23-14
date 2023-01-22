@@ -47,11 +47,17 @@ unsigned char* aes_cmac(unsigned char* in, unsigned int length, unsigned char* o
     unsigned char Y[const_Bsize];
 
     // will encrypt n rounds
+
+    //printf("\n%sAES-128-CMAC Decrypted%s\n", ACCENTCOLOR, DEFAULT);
+    //print_bytes(out2, 16);
+    printf("\nBefore Encryption\n");
     for (auto int i = 0; i < n - 1; i++) {
         block_xor(Y, M[i], X);
+	print_bytes(Y, 16);
         aes_128_encrypt(Y, X, key);
     }
     block_xor(Y, M[n - 1], X); //XOR one last time (with the last output) -for message authentication?
+    print_bytes(Y, 16);
     aes_128_encrypt(Y, out, key); //encrypting the result of XORing, pass key with it
     free(K1);
     free(K2);
