@@ -3,9 +3,11 @@
 // cc -I/usr/local/Cellar/openssl@1.1/1.1.1h/include -L/usr/local/Cellar/openssl@1.1/1.1.1h/lib -lssl -lcrypto mac_example.c
 #include <stdio.h>
 #include <openssl/cmac.h>
+#include <openssl/evp.h>
 
 void printBytes(unsigned char *buf, size_t len) {
-  for(int i=0; i<len; i++) {
+  int i;  
+  for(i=0; i<len; i++) {
     printf("%02x ", buf[i]);
   }
   printf("\n");
@@ -31,18 +33,51 @@ int main(int argc, char *argv[])
                               0xe9,0x3d,0x7e,0x11, 
                               0x73,0x93,0x17,0x2a };
 
+  printf("Message: ");
+  printBytes(message, 16);
+  //printf("\n");
+
+
   unsigned char mact[16] = {0}; 
   size_t mactlen;
 
   CMAC_CTX *ctx = CMAC_CTX_new();
   CMAC_Init(ctx, key, 16, EVP_aes_128_cbc(), NULL);
-  printf("message length = %lu bytes (%lu bits)\n",sizeof(message), sizeof(message)*8);
+  // printf("message length = %lu bytes (%lu bits)\n",sizeof(message), sizeof(message)*8);
  
   CMAC_Update(ctx, message, sizeof(message));
   CMAC_Final(ctx, mact, &mactlen);
-
   printBytes(mact, mactlen);
   /* expected result T = 070a16b4 6b4d4144 f79bdd9d d04a287c */
+
+  //EVP_Cipher()
+  
+  ///////
+
+#define KEYSIZE 16
+  //int dataLength = sizeof(message) / sizeof(unsigned char);
+  // int dataLength = 16 / 1;
+  // int ciphertextLength = dataLength-4;
+  EVP_CIPHER_CTX* ctx2 = EVP_CIPHER_CTX_new();
+  EVP_DecryptInit_ex(ctx2, EVP_rc2_ecb(), NULL, NULL, NULL);
+  EVP_CIPHER_CTX_set_key_length(ctx2, KEYSIZE); // RC2 is an algorithm with variable key size. Therefore the key size must generally be set.
+  EVP_DecryptInit_ex(ctx2, NULL, NULL, key, NULL);
+  unsigned char* plaintext = (unsigned char*)malloc(sizeof(unsigned char) * mactlen);
+  int length;
+  EVP_DecryptUpdate(ctx2, plaintext, &length, mact, mactlen);
+  int plaintextLength = length;
+  EVP_DecryptFinal_ex(ctx2, plaintext + plaintextLength, &length);
+  plaintextLength += length;
+  printf("Plaintext: "); 
+  printBytes(plaintext, plaintextLength);
+  printf("\n");
+
+
+  ///////
+
+
+
+
 
   CMAC_CTX_free(ctx);
   return 0;
