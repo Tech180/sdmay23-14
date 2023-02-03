@@ -67,7 +67,7 @@ void main(int argc, char *argv[]) {
 	  printf("\n current time: %lf  last time: %lf  toSleep: %d", currentTime, lastTime, toSleep);
 	  usleep(toSleep);//use times to add in some delay to make simulation more realistic
 	}
-	get_CMAC_tag(lineFromFile, counter);
+	passLineFromFile(lineFromFile, counter);
 
 	lastTime = currentTime;
       }

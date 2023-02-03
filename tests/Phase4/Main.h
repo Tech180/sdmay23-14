@@ -15,6 +15,6 @@
 #include <openssl/x509.h>
 #include <openssl/cmac.h>
 
-extern void passLineFromFile(char line[], int count);
+extern void get_CMAC_tag(char line[], int count);
 
 #endif /* MAIN_H_ */

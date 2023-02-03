@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=-lssl -lcrypto
 DEPS = Main.h
-OBJ = Bridge.o Main.o 
+OBJ = CMAC.o Main.o 
 
 %.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
