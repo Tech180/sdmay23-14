@@ -43,6 +43,15 @@ void main(int argc, char *argv[]) {
     char *timePtr;
     double sleepTime = 0.0;
     int toSleep = 0;
+    int linesCombined=0;
+    
+    // unsigned char canData2[40];
+    int fiveLinesIdx=0;
+
+  int startingPoint;
+  int positionInFrame;
+  int indexLineFromFile = 0;
+ unsigned char canData[80];
 
     //prints out all the lines where the main parameter (ex: 00x) 
     // is the same type as the identifier from the line in the file
@@ -57,17 +66,41 @@ void main(int argc, char *argv[]) {
        //checking that types are equal
       //if the parameter to main is '00x' and the line of the file has '00x' they are both engine 
       if(strcmp(ECU_type, lineType)==0){ 
-	//printf("\npassed if statement \n ");
-	//printf("line %d: %c%c%c  \n", counter, lineFromFile[24], lineFromFile[25], lineFromFile[26]);
 	currentTime = strtod(lineFromFile, &timePtr);
 
 	if(lastTime > 0.0){
 	  sleepTime = currentTime-lastTime;
 	  toSleep = sleepTime * 1000000;
-	  printf("\n current time: %lf  last time: %lf  toSleep: %d", currentTime, lastTime, toSleep);
-	  usleep(toSleep);//use times to add in some delay to make simulation more realistic
+	  //prints basic info for each line (each line from file is equivalent of 1 CAN frame)
+	  printf("\nline: %d, current time: %lf  last time: %lf  toSleep: %d", counter, currentTime, lastTime, toSleep);
+	  usleep(toSleep);//use times to add in some delay to make simulation more realistic, set to 0 by default
 	}
-	get_CMAC_tag(lineFromFile, counter);
+
+
+	//finds 16 digits we care about at the end of each line (they all have a 'd 8' before them, 
+	// so this loop identifies where the 'd 8' is and then adds 4 to be positioned 
+	// at the start of the 16 digits
+	  for(startingPoint=0; line[startingPoint]!='\0' ; startingPoint++){
+	    if(line[startingPoint] == 'd' && line[startingPoint+2] == '8'){
+	      startingPoint+= 4;
+	      break;
+	    }
+	  }
+	  //after being positioned properly, we then take the 16 digits (skipping over spaces and new line characters)
+	  for(positionInFrame=startingPoint; line[positionInFrame]!='\0'; positionInFrame++){
+	    if(line[positionInFrame] != ' ' && line[positionInFrame] != '\n'){
+	      canData[fiveLinesIdx]=line[positionInFrame];//adds to canData which is where we collect  5 sets of 16 digits
+	      fiveLinesIdx++;
+	    }
+	  }
+	  linesCombined++;
+
+	 //after 5 lines are added to canData array, we want to send those 5 messages to get CMAC tag
+	if(linesCombined == 5){
+	  get_CMAC_tag(lineFromFile, counter, canData);
+	  linesCombined=0;
+	  fiveLinesIdx=0;
+	}
 
 	lastTime = currentTime;
       }

@@ -15,69 +15,43 @@ void initCMAC(int flag, CMAC_CTX *ctx)
 	flag = 1;
 	CMAC_Init(ctx, key, 16, EVP_aes_128_cbc(), NULL);
 }
-void get_CMAC_tag(char line[], int count){
+void get_CMAC_tag(char line[], int count, char canData[]){
   int idx; // index variable for line
   int i; // index for encrypted message
   int flag = 0; // to initialize cmac
-  unsigned char canData[128]; //readLine
-  int startingPoint;
-  int positionInFrame;
-  int indexLineFromFile = 0;
-  unsigned char finalCMAC[6];
+
+  unsigned char finalCMAC[5];
  
 
-   printf("\nline %d: ", count); // prints line #
-  // for(idx=0; idx<70; idx++){
-  //  printf("%c", line[idx]);    //prints line from file data
-  // }
-
-   //usleep(1000000);
-
-  unsigned char mact[16] = {0}; // setting empty char array for 128 bit encryption (16bytes)
-    size_t mactlen;
+  unsigned char mact[16]; // setting empty char array for 128 bit encryption (16bytes)
+  size_t mactlen;
     CMAC_CTX *ctx = CMAC_CTX_new();
-	if(flag == 0)
+    if(flag == 0) //this is only true the first time we call this function, so it only initializes one time
 	{
-		initCMAC(flag, ctx);
+	  initCMAC(flag, ctx);
 	}
-    //CMAC_Init(ctx, key, 16, EVP_aes_128_cbc(), NULL);
 
-    // 5. identifies start off message to encrypt & breaks when it finds it
-    //first line of file: 4410.000868 1     18FFFA13x        Rx    d 8 00 14 FF 3F FF FF FF FF
-    //from that first line, this loop identifies the 'd 8' and then adds 4 which is where the 
-    //     16 digits start
-    for(startingPoint=0; line[startingPoint]!='\0' ; startingPoint++){
-	if(line[startingPoint] == 'd' && line[startingPoint+2] == '8'){
-	  startingPoint+= 4;
-	  break;
-	}
-    }
+    CMAC_Update(ctx, canData, sizeof(canData)); 
 
-      // 6. gets 16 digits to encrypt
-      indexLineFromFile = 0;
-      for(positionInFrame=startingPoint; line[positionInFrame]!='\0'; positionInFrame++){
-	if(line[positionInFrame] != ' '){
-	  canData[indexLineFromFile]=line[positionInFrame];
-	  indexLineFromFile++;
-	}
-      }
-    CMAC_Update(ctx, canData, sizeof(canData));
-    CMAC_Final(ctx, mact, &mactlen);
+    CMAC_Final(ctx, mact, &mactlen); //CMAC tag is put into mact (size of 16)
      
-    printf("\nCanData:");
-    for(i=0; i < 16; i++){
+    printf("\nCanData: ");
+    //prints out the 80 chars (5 messages of 16 chars each went into canData)
+    for(i=0; i < 80; i++){
       printf("%c", canData[i]);
     }
-    printf("\nFull CMAC tag: ");
-    for(i=0; i < mactlen; i++){
-      printf("%X", mact[i]);
+    printf("\nFull CMAC tag (should be 10 chars): ");
+    for(i=0; i < 5; i++){
+      printf("%X", mact[i]);//printing out all the hex values from mact array (should print out 10 digits each time)
     }
     
-    printf("\n"); // get the 5 bytes we want
+    printf("\n"); 
+    // get the 5 bytes we want by moving hex values from mact to finalCMAC
+    //should print out 2 chars (like "1F") for each index
     for(i=0; i < 5; i++){
-      printf("mact[%d]: %X\n", i, mact[i]);
+      printf("mact[%d]: %2X\n", i, mact[i]);
       finalCMAC[i]=mact[i];
-      printf("finalCMAC[%d]: %X\n", i, finalCMAC[i]);
+      printf("finalCMAC[%d]: %2X\n", i, finalCMAC[i]);
     }
 
   printf("\n");
