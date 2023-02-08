@@ -8,3 +8,7 @@ OBJ = CMAC.o Main.o
 
 Main: $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS)
+
+
+clean:
+	rm -f $(OBJ) Main *~

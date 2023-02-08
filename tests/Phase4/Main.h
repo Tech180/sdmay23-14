@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include <openssl/bio.h> /* BasicInput/Output streams */
 #include <openssl/err.h> /* errors */
