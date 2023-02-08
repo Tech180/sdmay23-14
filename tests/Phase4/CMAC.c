@@ -43,7 +43,7 @@ void get_CMAC_tag(char line[], int count, char canData[])
   {
     printf("%c", canData[i]);
   }
-  printf("\nFull CMAC tag (should be 10 chars): ");
+  printf("\nCMAC tag (should be 10 chars): ");
   for (i = 0; i < 5; i++)
   {
     printf("%X", mact[i]); // printing out all the hex values from mact array (should print out 10 digits each time)
