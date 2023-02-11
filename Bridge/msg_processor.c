@@ -2,47 +2,48 @@
 #include <string.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include "msg_processor.h"
 
-void* msgThread();                  //initializing threads and mutexes
-pthread_mutex_t msgMutex;
+#define CAN_WIDTH 8
 
 struct queue {
 	struct message * head, * tail;
 	int num_messages; 
 } queue; 
 
-struct threadWork { 
-	struct threadWork * next; 
-	struct threadWork * prev;
-	struct message * msg; 
-	int msg_id; 
-} threadWork; 
+struct message {	
+   	int dataField[CAN_WIDTH];              
+};
 
-typedef struct message {	
-	int startOfFrame;	
-   	int arbitrationField;
-   	int controlField;
-   	int dataField;                   //all these add up to the 25bit CanFD frame
-   	int CRCField;
-   	int ACKField;
-   	int endOfFrame;
+struct extended_message { 
+	struct message* can_msgs;
+   	int freshnessField[16];
+	int trailerField[8];
+};
 
-} message;
+int main (int argc, char **argv) { 
+	char input[10];
 
-
-void* msgThread(char msg){          //thread function
-
-   	pthread_mutex_lock(&msgMutex);      //lock
-   	//do something
-   	pthread_mutex_unlock(&msgMutex);    //unlock
+	while(1) {
+		fgets(input, 10, stdin);
+		packMsg(input);
+	}
 }
 
-int main (int argc, chat **argv) {    //main method
-   	startOfFrame = 0x1;
-   	arbitrationField = 0x5;
-   	controlField = 0x8;
-   	dataField = 0x3;
-   	CRCField = 0x9;
-   	ACKField = 0x2;
-   	endOfFrame = 0x3;
+void packMsg(char input[]) {
+	static int msgCounter = 0;
+	struct message can_msg = { input }; 
+	struct extended_message canfd_msg = { can_msg, 0, 0};	
+	msgCounter++;
+	
+	if(msgCounter == 5) {
+		export(canfd_msg);
+		msgCounter = 0; 
+		canfd_msg = { struct message can_msgs, 0, 0 }
+	}
+}
+
+void export(struct extended_message* canfd_msg) {
+	printf("%d\n %d\n %d\n %d\n %d\n", canfd_msg->can_msgs[0], canfd_msg->can_msgs[1], 
+										canfd_msg->can_msgs[2], canfd_msg->can_msgs[3], canfd_msg->can_msgs[4]);	
 }
