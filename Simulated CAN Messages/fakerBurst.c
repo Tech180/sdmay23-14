@@ -5,32 +5,28 @@
 #include <string.h>
 #include <time.h>
 #include <sys/stat.h>
-#include <windows.h>
-#include <io.h>
-#include <conio.h>
+#include <unistd.h>
 
 void printGoodMessage(int i);
 const char* decToHexa(int n);
 int genCanMsg();
 int genRandom(int low, int high);
 
-void changeMessage(char c, char *buf);
-
 int main(int argc, char* argv[]) {
 	int i = 0;
-    char c;
+    	char c;
 	int press = 0;
 	char *buf = " 183#0000000400001007\n";
 	printf("-----------PROGRAM BEGIN-----------\n");
 
 	while (1) {
 		
-		if(kbhit()){
-			c = getch();
+		if(getc(stdin) > 0){
+			c = getc(stdin);
 		}
 		
 		if(c != 79){
-			Sleep(10);
+			sleep(1);
 		}
 		
 		if(c == 49){
@@ -52,13 +48,11 @@ int main(int argc, char* argv[]) {
 		if(c == 53){
 			buf = " 13A#000000000000000A\n";
 		}
-	
-		changeMessage(c,buf);
 		
 		char iValue[50] = "";
-		itoa(i,iValue,10);
+		sprintf(iValue, "%d", i);
 		strcat(iValue,buf);
-		_write(fileno(stdout),iValue,strlen(iValue)+1);
+		write(fileno(stdout),iValue,strlen(iValue)+1);
 		i++;
 	}
 }
