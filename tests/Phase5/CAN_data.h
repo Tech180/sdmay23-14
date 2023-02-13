@@ -10,7 +10,7 @@
 		uint32_t sender_ID;
 		uint8_t send_recv;
 		uint32_t data_len;
-		uint8_t data[8];
+		uint8_t data[11];
 		uint32_t CMAC_data_len;
 		uint8_t CMAC_data[16];
 	} CAN_data_s;

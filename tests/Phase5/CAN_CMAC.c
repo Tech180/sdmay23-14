@@ -43,7 +43,6 @@ void get_CMAC_tag(CAN_data_s *CAN_data, int count) {
 		}	
   }
 
-	
 	//CMAC_Final(CMAC_CTX *ctx, unsigned char *out_mac, size_t *out_len);
   // CMAC_Final() stores the length of the message authentication code in bytes,
   // which equals the cipher block size, into *out_len. Unless out_mac is NULL,
