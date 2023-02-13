@@ -5,7 +5,7 @@
 #include <string.h>
 #include <time.h>
 #include <sys/stat.h>
-#include <windows.h>
+#include <unistd.h>
 
 void printGoodMessage(int i);
 const char* decToHexa(int n);
@@ -18,7 +18,7 @@ int main(int argc, char* argv[]) {
 	printf("-----------PROGRAM BEGIN-----------\n");
 
 	while (1) {
-        Sleep(250);
+        sleep(0.1);
         printGoodMessage(i);
         i++;
 		if (i % 10 == 0){
