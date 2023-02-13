@@ -14,7 +14,7 @@ int genRandom(int low, int high);
 
 int main(int argc, char* argv[]) {
 	int i = 0;
-	srand(3);
+
 	printf("-----------PROGRAM BEGIN-----------\n");
 
 	while (1) {
@@ -56,49 +56,4 @@ int genCanMsg(int i){
   */
 int genRandom(int low, int high){
     return (rand() % (high - low + 1)) + low;
-}
-
-/**
-  * Converts a decimal value to hex
-  */
-const char* decToHexa(int n)
-{
-    // ans string to store hexadecimal number
-    char ans[20] = "";
-   
-    while (n != 0) {
-        // remainder variable to store remainder
-        int rem = 0;
-         
-        // ch variable to store each character
-        char ch;
-        // storing remainder in rem variable.
-        rem = n % 16;
- 
-        // check if temp < 10
-        if (rem < 10) {
-            ch = rem + 48;
-        }
-        else {
-            ch = rem + 55;
-        }
-         
-        // updating the ans string with the character variable
-        strncat(ans, &ch, 1);
-        n = n / 16;
-    }
-     
-    // reversing the ans string to get the final result
-    int i = 0, j = strlen(ans) - 1;
-    while(i <= j)
-    {
-      char temp = ans[i];
-      char temp2 = ans[j];
-      ans[i] = temp2;
-      ans[j] = temp;
-      i++;
-      j--;
-    }
-    char *ret = ans;
-    return ret;
 }
