@@ -1,0 +1,17 @@
+General CAN bus:
+- https://crypto.stackexchange.com/questions/87751/what-encryption-mode-should-i-use-to-protect-can-bus-communication 
+
+Basic encryption/decryption program:
+
+
+CTR:
+
+
+CMAC:
+- discussion / good example: https://stackoverflow.com/questions/28354844/how-to-calculate-aes-cmac-using-openssls-cmac-xxx-functions 
+
+
+
+CBC:
+- discussion: https://stackoverflow.com/questions/39412760/what-is-an-openssl-iv-and-why-do-i-need-a-key-and-an-iv
+

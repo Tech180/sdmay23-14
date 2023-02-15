@@ -1,0 +1,24 @@
+Quick Overview:
+The setup guide will help you get OpenSSL installed, as well as how to compile and run the files in this folder. Main.c was our first attempt at getting it working, but it 
+was shelfed to start fresh with Example.c, which is a program that reads in from the CAN file 'Full_CAN_Bus_Log.asc' and uses two of the more basic encryption/decryption algorithms in OpenSSL. 
+
+Setup guide: 
+1. Open VMware Horizon Client
+2. Select 'Engineering Linux'
+3. download 'openssl-1.1.1s.tar.gz' from https://github.com/openssl/openssl 
+4. unzip tar.gz from step 3 and open folder
+    - directions used from unzipped openssl folder:
+        - config.com
+        - INSTALL
+5. once inside, right click in folder and select 'Open in Terminal'
+6. Run './config --prefix=/home/scehovic/desktop --openssldir=/home/scehovic/desktop' 
+    *note: change 'scehovic' to whatever the username is on the linux machine
+7. Run 'make install'
+-------this is the end of installing OpenSSL----------
+8. to compile InitialDesign.c run: gcc -o InitialDesign InitialDesign.c -lssl -lcrypto
+9. to run InitialDesign.c file: ./InitialDesign
+
+code from  'https://git.ece.iastate.edu/sd/sdmay23-14' inside the folders tests -> Ryan Scehovic
+
+other links: 
+https://github.com/openssl/openssl 
