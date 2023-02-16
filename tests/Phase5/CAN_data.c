@@ -52,8 +52,8 @@ CAN_data_s read_CAN_data(char CAN_Dataline[]) {
     CAN_data.valid = 0;
     return CAN_data;
   }
-
-  for (int i = 0; i < CAN_data.data_len; i++) {
+  int i;
+  for (i = 0; i < CAN_data.data_len; i++) {
     CAN_data.data[i] = (uint8_t)data[i];
   }
 
@@ -82,7 +82,8 @@ void print_CAN_data(CAN_data_s CAN_data) {
   if (CAN_data.CMAC_data_len == 0)
     return;
   printf("CMAC encrypted data[%d]: ", CAN_data.CMAC_data_len);
-  for (int i = 0; i < CAN_data.CMAC_data_len; i++) {
+  int i;
+  for (i = 0; i < CAN_data.CMAC_data_len; i++) {
     printf("%02X ", CAN_data.CMAC_data[i]);
   }
   printf("\n");

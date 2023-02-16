@@ -35,10 +35,11 @@ void get_CMAC_tag(CAN_data_s *CAN_data, int count) {
 
 	uint8_t CMAC_data[16];
 	uint8_t CMAC_data_len;
+	int i;
   if (count % CMAC_MSG_COUNT == CMAC_MSG_COUNT - 1) {
     CMAC_Final(ctx, CMAC_data, (size_t *)&CMAC_data_len);
 		CAN_data->CMAC_data_len = CMAC_data_len;
-		for (int i  = 0; i < CMAC_data_len; i++) {
+		for (i  = 0; i < CMAC_data_len; i++) {
 			CAN_data->CMAC_data[i] = CMAC_data[i];
 		}	
   }
