@@ -32,13 +32,13 @@ int main (int argc, char **argv) {
 
 void packMsg(char input[]) {
 	static int msgCounter = 0;
-	struct message can_msg = { input }; 
-	struct extended_message canfd_msg = { can_msg, 0, 0};	
+	struct message can_msg = { input };
+	struct extended_message canfd_msg = { can_msg, 0, 0};
 	msgCounter++;
 	
 	if(msgCounter == 5) {
 		export(canfd_msg);
-		msgCounter = 0; 
+		msgCounter = 0;
 		canfd_msg = { struct message can_msgs, 0, 0 }
 	}
 }
