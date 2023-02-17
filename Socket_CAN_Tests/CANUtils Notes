@@ -1,0 +1,22 @@
+CAN Utils
+
+Install and basic info: https://elinux.org/Can-utils
+Simple Usage Video: https://www.youtube.com/watch?v=YDuGjqt1_lE
+
+Most basic example
+Have 2 terminals open!
+
+#In the first terminal type
+sudo modprobe vcan
+sudo ip link add dev vcan0 type vcan
+sudo ip link set up vcan0
+#This opens up vcan0 for communication
+
+
+#In the second terminal type
+candump vcan0
+#this dumps can messages to the terminal that are sent to vcan0 in real time
+
+#Lastly in the first terminal type
+cangen vcan0
+#CAN messages are now being generated through vcan0
