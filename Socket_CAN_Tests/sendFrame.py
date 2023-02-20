@@ -3,13 +3,11 @@ from socketcan import *
 interface = "vcan0"
 s = CanRawSocket(interface=interface)
 
-f = open("sample-can.log")
+f = open("00x.txt")
 for x in f:
-  idString = x[0:3]
-  dataString = x[4:]
   
-  can_id = int(idString,16)
-  data = bytes.fromhex(dataString)
+  can_id = int(x[24:26] + "" + x[27:29],16)
+  data = bytes.fromhex(x[0:24])
   
   frame1 = CanFrame(can_id=can_id, data=data)
 
