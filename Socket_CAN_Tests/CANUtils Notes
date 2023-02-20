@@ -16,6 +16,7 @@ sudo ip link set up vcan0
 #In the second terminal type
 candump vcan0
 #this dumps can messages to the terminal that are sent to vcan0 in real time
+#You may also run "candump vcan0 -l" to generate a log file
 
 #Lastly in the first terminal type
 cangen vcan0
