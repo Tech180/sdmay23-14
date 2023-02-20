@@ -70,11 +70,17 @@ CAN_data_s read_CAN_data(char CAN_Dataline[]) {
 }
 
 void print_CAN_data(CAN_data_s CAN_data) {
-
+  FILE *outputfile = fopen("00x.txt", "a");
   printf("%lf %1x %08Xx %1X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X "
          "%02X\n",
          CAN_data.timestamp_sec, CAN_data.bus, CAN_data.sender_ID,
          CAN_data.data_len, CAN_data.data[0], CAN_data.data[1],
+         CAN_data.data[2], CAN_data.data[3], CAN_data.data[4], CAN_data.data[5],
+         CAN_data.data[6], CAN_data.data[7], CAN_data.data[8], CAN_data.data[9],
+         CAN_data.data[10]);
+  fprintf(outputfile, "%02X %02X %02X %02X %02X %02X %02X %02X %02X %02X "
+         "%02X\n",
+         CAN_data.data[0], CAN_data.data[1],
          CAN_data.data[2], CAN_data.data[3], CAN_data.data[4], CAN_data.data[5],
          CAN_data.data[6], CAN_data.data[7], CAN_data.data[8], CAN_data.data[9],
          CAN_data.data[10]);
