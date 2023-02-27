@@ -8,7 +8,7 @@ channel = 'vcan0'
 def run():
     bus = can.interfaces.socketcan.SocketcanBus(channel=channel, fd=True)
     f = open("00x2.txt")
-    lineCount = 1;
+    lineCount = 1
     data_msg=[]
 
 #reads 5 lines from the file, adding each to data_msg[], then creates msg to send on bus
@@ -24,6 +24,6 @@ def run():
             can_id = int(x[16:18] + "" + x[18:20] + x[20:22],16) #PGN & SA
             data_msg.append(can_id)
             data_msg.append(bytes.fromhex(x[0:16]))
-        lineCount++
+        lineCount+=1
 
 run()
