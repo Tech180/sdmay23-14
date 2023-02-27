@@ -9,7 +9,7 @@ def run():
     #setting to CAN FD
     bus = can.interfaces.socketcan.SocketcanBus(channel=channel, fd=True)
     f = open("00x2.txt")
-    lineCount = 1
+    lineCount = 1 #inFuture: convert to bytes to use as freshness value
     data_msg=[]
 
 #reads 5 lines from the file, adding each to data_msg[], then creates msg to send on bus
