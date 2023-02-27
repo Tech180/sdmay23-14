@@ -2,7 +2,9 @@
 from socketcan import *
 
 interface = "vcan0"
-s = CanRawSocket(interface=interface, fd=True)
+#s = CanRawSocket(interface=interface, fd=True)
+s = can.interfaces.socketcan.SocketcanBus(channel="vcan0", fd=True)
+
 
 f = open("00x2.txt")
 for x in f:
