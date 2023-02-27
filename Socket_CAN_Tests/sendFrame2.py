@@ -6,6 +6,7 @@ bustype = 'socketcan'
 channel = 'vcan0'
 
 def run():
+    #setting to CAN FD
     bus = can.interfaces.socketcan.SocketcanBus(channel=channel, fd=True)
     f = open("00x2.txt")
     lineCount = 1
