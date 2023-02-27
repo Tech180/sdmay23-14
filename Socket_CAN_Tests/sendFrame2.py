@@ -1,5 +1,6 @@
 
 from socketcan import *
+imort can
 
 interface = "vcan0"
 #s = CanRawSocket(interface=interface, fd=True)
