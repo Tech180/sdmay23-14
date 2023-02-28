@@ -23,10 +23,10 @@ def run():
         data_msg.append(source_address)
 
         for i in range(0,15,2):
-            data_msg.append(int(x[i:i+1], 16))
+            data_msg.append(int(x[i:i+2], 16))
 
         if lineCount % 5 == 0:
-            msg = can.Message(arbitration_id=0xabc123, data=[1,2,3,4,5,6,7,8], is_extended_id=True)
+            msg = can.Message(arbitration_id=0xabc123, data=[1,2,3,4,5,6,7,8, 9, 10], is_extended_id=True)
             bus.send(msg) #this is where it breaks
             data_msg=[]
             
