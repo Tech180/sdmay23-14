@@ -14,19 +14,22 @@ def run():
 
 #reads 5 lines from the file, adding each to data_msg[], then creates msg to send on bus
     for x in f:
+        pgn_1 = int(x[16:18], 16)
+        pgn_2 = int(x[18:20], 16)
+        source_address = int(x[20:22],16)
+
+        data_msg.append(pgn_1)
+        data_msg.append(pgn_2)
+        data_msg.append(source_address)
+
+        for i in range(0,15,2):
+            data_msg.append(int(x[i:i+1], 16))
+
         if lineCount % 5 == 0:
-            can_id = int(x[16:18] + "" + x[18:20] + x[20:22],16) #PGN & SA
-            data_msg.append(can_id)
-            data_msg.append(int(x[0:16], 16))
             msg = can.Message(arbitration_id=can_id, data=data_msg, is_extended_id=False)
             bus.send(msg)
             data_msg=[]
-            print(data_msg)
-        else:
-            can_id = int(x[16:18] + "" + x[18:20] + x[20:22],16) #PGN & SA
-            data_msg.append(can_id)
-            data_msg.append(int(x[0:16], 16))
-            print(data_msg)
+            
         lineCount+=1
 
 run()
