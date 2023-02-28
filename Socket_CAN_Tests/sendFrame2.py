@@ -17,7 +17,7 @@ def run():
         if lineCount % 5 == 0:
             can_id = int(x[16:18] + "" + x[18:20] + x[20:22],16) #PGN & SA
             data_msg.append(can_id)
-            data_msg.append(bytes.fromhex(x[0:16]))
+            data_msg.append(int(bytes.fromhex(x[0:16]), 16))
             msg = can.Message(arbitration_id=can_id, data=data_msg, is_extended_id=False)
             bus.send(msg)
             data_msg=[]
