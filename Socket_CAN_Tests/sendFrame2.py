@@ -26,10 +26,8 @@ def run():
             data_msg.append(int(x[i:i+1], 16))
 
         if lineCount % 5 == 0:
-            msg = can.Message(arbitration_id=0xabc123, data=data_msg, is_extended_id=True)
-            print("flag 1")
-            bus.send(msg)
-            print("flag 2")
+            msg = can.Message(arbitration_id=0xabc123, data=[1,2,3,4,5,6,7,8], is_extended_id=True)
+            bus.send(msg) #this is where it breaks
             data_msg=[]
             
         lineCount+=1
