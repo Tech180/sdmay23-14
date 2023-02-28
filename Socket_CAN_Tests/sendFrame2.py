@@ -22,10 +22,12 @@ def run():
         data_msg.append(pgn_1)
         data_msg.append(pgn_2)
         data_msg.append(source_address)
-
+        if lineCount % 5 == 0:
+            print("flag 1")
         for i in range(0,15,2):
             data_msg.append(int(x[i:i+1], 16))
-
+        if lineCount % 5 == 0:
+            print("flag 2")
         if lineCount % 5 == 0:
             msg = can.Message(arbitration_id=0xabc123, data=data_msg, is_extended_id=False)
             bus.send(msg)
