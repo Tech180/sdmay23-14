@@ -24,7 +24,7 @@ def run():
         else:
             can_id = int(x[16:18] + "" + x[18:20] + x[20:22],16) #PGN & SA
             data_msg.append(can_id)
-            data_msg.append(bytes.fromhex(x[0:16]))
+            data_msg.append(int(x[0:16], 16))
         lineCount+=1
 
 run()
