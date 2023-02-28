@@ -31,5 +31,6 @@ def run():
             data_msg=[]
             
         lineCount+=1
+        print(data_msg)
 
 run()
