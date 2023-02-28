@@ -14,6 +14,7 @@ def run():
 
 #reads 5 lines from the file, adding each to data_msg[], then creates msg to send on bus
     for x in f:
+        print("start of cycle ", lineCount)
         pgn_1 = int(x[16:18], 16)
         pgn_2 = int(x[18:20], 16)
         source_address = int(x[20:22],16)
