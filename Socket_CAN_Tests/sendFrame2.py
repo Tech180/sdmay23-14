@@ -21,10 +21,12 @@ def run():
             msg = can.Message(arbitration_id=can_id, data=data_msg, is_extended_id=False)
             bus.send(msg)
             data_msg=[]
+            print(data)
         else:
             can_id = int(x[16:18] + "" + x[18:20] + x[20:22],16) #PGN & SA
             data_msg.append(can_id)
             data_msg.append(int(x[0:16], 16))
+            print(data)
         lineCount+=1
 
 run()
