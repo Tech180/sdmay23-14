@@ -26,7 +26,7 @@ def run():
             data_msg.append(int(x[i:i+1], 16))
 
         if lineCount % 5 == 0:
-            msg = can.Message(arbitration_id=can_id, data=data_msg, is_extended_id=False)
+            msg = can.Message(arbitration_id=0xabc123, data=data_msg, is_extended_id=False)
             bus.send(msg)
             data_msg=[]
             
