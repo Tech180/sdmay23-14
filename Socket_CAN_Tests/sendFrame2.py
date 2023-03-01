@@ -12,7 +12,7 @@ def run():
     lineCount = 1 #inFuture: convert to bytes to use as freshness value
     data_msg=[]
 
-#reads 5 lines from the file, adding each to data_msg[], then creates msg to send on bus
+    #reads 5 lines from the file, adding each to data_msg[], then creates msg to send on bus
     for x in f:
         pgn_1 = int(x[16:18], 16)
         pgn_2 = int(x[18:20], 16)
