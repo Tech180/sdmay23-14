@@ -11,7 +11,7 @@ currentMonotonicCounter = [0, 0, 0, 0, 0] #each value holds 1 byte or up to 255
 t=1 #temp value each time to be stored / updating the montonic value's current byte
 #1,099,511,600,000
 #setting to CAN FD
-bus = can.interfaces.socketcan.SocketcanBus(channel=channel, fd=True)
+bus = can.interfaces.socketcan.SocketcanBus(channel=channel, fd=True) #setting bus to accept CanFD
 f = open("00x2.txt")
 lineCount = 1 #inFuture: convert to bytes to use as freshness value
 data_msg=[]
@@ -20,9 +20,6 @@ Sx = bytes.fromhex("00000000111111112222222233333333") #key
 for x in f:
     if(lineCount % 5 == 1): #happens once every 5 iterations, this is where cmac and monotonic need to go
         c = cmac.CMAC(algorithms.AES(Sx)) #initialize cmac
-    if(lineCount == 80):
-        #entering debug
-        print("debug mode activated")
     pgn_1 = x[16:18]
     pgn_2 = x[18:20]
     source_address = x[20:22]
@@ -40,18 +37,18 @@ for x in f:
         test += x[i:i+2]
     testToBytes = bytes(test, 'utf-8')
     c.update(testToBytes)
-    if lineCount % 5 == 0:
-        tag = c.finalize()
-        counterInHex = hex(t).replace('0x', '')
-        
+    if lineCount % 5 == 0: 
+        counterInHex = hex(t).replace('0x', '')     
         for i in range(0,10-len(counterInHex)):
             counterInHex = '0' + counterInHex
-
         currentMonotonicCounter[0]=counterInHex[0:2]
         currentMonotonicCounter[1]=counterInHex[2:4]
         currentMonotonicCounter[2]=counterInHex[4:6]
         currentMonotonicCounter[3]=counterInHex[6:8]
         currentMonotonicCounter[4]=counterInHex[8:10]
+        counterInBytes = bytes(counterInHex, 'utf-8')
+        c.update(counterInBytes)
+        tag = c.finalize()
         cmactag = (tag.hex())
         first4Bytes = cmactag[:-24] #grabs first 4 bytes of the cmac tag
         hexArray = [int(first4Bytes[0:2], 16), int(first4Bytes[2:4], 16), int(first4Bytes[4:6], 16), int(first4Bytes[6:8], 16)]

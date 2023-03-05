@@ -12,10 +12,10 @@ currentMonotonicCounter = [0, 0, 0, 0, 0] #each value holds 1 byte or up to 255
 t=0 #temp value each time to be stored / updating the montonic value's current byte
 #1,099,511,600,000
 #setting to CAN FD
-bus = can.interfaces.socketcan.SocketcanBus(channel=channel, fd=True)
+bus = can.interfaces.socketcan.SocketcanBus(channel=channel, fd=True) #setting the bus interface to accept CanFD frames
 f = open("00x2.txt")
 lineCount = 1 #inFuture: convert to bytes to use as freshness value
-data_msg=[]
+data_msg=[] # a list of values that will act as the can fd frame as it gets packed into an actual CanFD frame later using a function call in the can library
 Sx = bytes.fromhex("00000000111111112222222233333333") #key
 #reads 5 lines from the file, adding each to data_msg[], then creates msg to send on bus
 for x in f:
