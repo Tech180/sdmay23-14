@@ -20,20 +20,25 @@ Sx = bytes.fromhex("00000000111111112222222233333333") #key
 for x in f:
     if(lineCount % 5 == 1): #happens once every 5 iterations, this is where cmac and monotonic need to go
         c = cmac.CMAC(algorithms.AES(Sx)) #initialize cmac
+    
+    # 3 metadata bytes
     pgn_1 = x[16:18]
     pgn_2 = x[18:20]
     source_address = x[20:22]
+
+    #string we are using for cmac stuff
     test = ""
     test += str(pgn_1)     
     test += str(pgn_2)
     test += str(source_address)
     
+    #appending to list the meta data bytes
     data_msg.append(int(pgn_1, 16))
     data_msg.append(int(pgn_2, 16))
     data_msg.append(int(source_address, 16))
 
     for i in range(0,15,2):
-        data_msg.append(int(x[i:i+2], 16)) # 8 bytes of data
+        data_msg.append(int(x[i:i+2], 16)) # 8 bytes of data to be added to the list
         test += x[i:i+2]
     testToBytes = bytes(test, 'utf-8')
     c.update(testToBytes)
