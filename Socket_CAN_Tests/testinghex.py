@@ -7,9 +7,8 @@ bustype = 'socketcan'
 channel = 'vcan0'
 
 
-lastMonotonicCounter = [0, 0, 0, 0, 0] #to compare to last to ensure only one value changes by +1
 currentMonotonicCounter = [0, 0, 0, 0, 0] #each value holds 1 byte or up to 255
-t=0 #temp value each time to be stored / updating the montonic value's current byte
+t=1 #temp value each time to be stored / updating the montonic value's current byte
 #1,099,511,600,000
 #setting to CAN FD
 bus = can.interfaces.socketcan.SocketcanBus(channel=channel, fd=True)
@@ -21,28 +20,9 @@ Sx = bytes.fromhex("00000000111111112222222233333333") #key
 for x in f:
     if(lineCount % 5 == 1): #happens once every 5 iterations, this is where cmac and monotonic need to go
         c = cmac.CMAC(algorithms.AES(Sx)) #initialize cmac
-        if(t == 255):
-            t = 1
-        else:
-            t+=1
-        #storing last monotonic counter value for last fd message sent
-        lastMonotonicCounter = currentMonotonicCounter
-        #setting monotonic counter value for new canfd message
-
-        if (currentMonotonicCounter[4] != 255): #if bits 1-8 all != 1
-            currentMonotonicCounter[4] = t
-        elif (currentMonotonicCounter[3] != 255): #if bits 9-16 all != 1
-            currentMonotonicCounter[3] = t
-        elif (currentMonotonicCounter[2] != 255): #if bits 17-24 all != 1
-            currentMonotonicCounter[2] = t
-        elif (currentMonotonicCounter[1] != 255): #if bits 25-32 all != 1
-            currentMonotonicCounter[1] = t
-        elif (currentMonotonicCounter[0] != 255): #if bits 33-40 all != 1
-            currentMonotonicCounter[0] = t
-        else: #but what if they do?
-            #code for new key later down the road, won't reach with current file
-            t=0 #rollover
-        
+    if(lineCount == 80):
+        #entering debug
+        print("debug mode activated")
     pgn_1 = x[16:18]
     pgn_2 = x[18:20]
     source_address = x[20:22]
@@ -62,6 +42,16 @@ for x in f:
     c.update(testToBytes)
     if lineCount % 5 == 0:
         tag = c.finalize()
+        counterInHex = hex(t).replace('0x', '')
+        
+        for i in range(0,10-len(counterInHex)):
+            counterInHex = '0' + counterInHex
+
+        currentMonotonicCounter[0]=counterInHex[0:2]
+        currentMonotonicCounter[1]=counterInHex[2:4]
+        currentMonotonicCounter[2]=counterInHex[4:6]
+        currentMonotonicCounter[3]=counterInHex[6:8]
+        currentMonotonicCounter[4]=counterInHex[8:10]
         cmactag = (tag.hex())
         first4Bytes = cmactag[:-24] #grabs first 4 bytes of the cmac tag
         hexArray = [int(first4Bytes[0:2], 16), int(first4Bytes[2:4], 16), int(first4Bytes[4:6], 16), int(first4Bytes[6:8], 16)]
@@ -80,10 +70,10 @@ for x in f:
         #print("theory: " + test + first4Bytes + currentMonotonicCounter)
         print("real: ")
         print(msg)
-
+        print(lineCount)
         data_msg=[]
+        t+=1
         
     lineCount+=1
-    
     #for i in range(len(data_msg)):
      #   print(hex(data_msg[i]))
