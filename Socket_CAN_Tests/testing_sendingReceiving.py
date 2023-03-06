@@ -4,7 +4,7 @@ from cryptography.hazmat.primitives import cmac
 from cryptography.hazmat.primitives.ciphers import algorithms
 
 bustype = 'socketcan'
-channel = 'vcan0'
+channel = 'vcan1'
 
 
 currentMonotonicCounter = [0, 0, 0, 0, 0] #each value holds 1 byte or up to 255
