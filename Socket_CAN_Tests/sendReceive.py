@@ -59,6 +59,32 @@ async def main() -> None:
     while True:
         # Wait for next message from AsyncBufferedReader
         msg = await reader.get_message()
+        
+        #TODO, scehovic and i were thinking about here's where the msg rejection code goes
+        # so to get an idea for how this would work is we are getting the msg right?
+        # lets try and reverse engineer it, see if you can put certain things into a list
+        # and then start making them their own variables, like can message 1, 2, 3....
+        # and so on like we did with the original thing john gave us that we extracted in c
+        # with the stuff broken down then, we can copy the same key from testinghex.py into
+        # this file and run the cmac algorithm on it all again (or look up if there is a verify
+        # function and go from there. like maybe an if != correct verification print out a msg
+        # that says "BAD MESSAGE", and a way to actually test this would be maybe find a 
+        # function like how we have sleep in C, see if something like that is in python
+        # and go implement that in testinghex.py like a message each second or two (there is
+        # like 500 or so of them (3550 / 5))
+
+
+
+
+
+
+
+
+
+
+
+
+
         print(msg)
         # Delay response
         ##await asyncio.sleep(0.5)
