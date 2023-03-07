@@ -8,6 +8,21 @@ from can.message import Message
 # use this to catch ^c (the SIGINT signal) and exit out 
 # of infinite loop more gracefully
 import signal
+from cryptography.hazmat.primitives import cmac
+from cryptography.hazmat.primitives.ciphers import algorithms
+
+class color:
+   PURPLE = '\033[95m'
+   CYAN = '\033[96m'
+   DARKCYAN = '\033[36m'
+   BLUE = '\033[94m'
+   GREEN = '\033[92m'
+   YELLOW = '\033[93m'
+   RED = '\033[91m'
+   BOLD = '\033[1m'
+   UNDERLINE = '\033[4m'
+   END = '\033[0m'
+
 
 # signal handler
 def handler(signum, frame):
@@ -23,15 +38,39 @@ def print_message(msg: can.Message) -> None:
 
 def fwd_1to0(msg: can.Message) -> None:
     """Regular callback function. Can also be a coroutine."""
-    bus0.send(msg)
+    bus1.send(msg)
     #bus1.send(msg)
 
+def cmac_validate(msg):
+    #indexs [55, 56, 57, 58, 59, 60, 61, 62, 63]  - cmac is held in 55-58 (4 bytes)
+    cmac_from_received_msg = msg.data[55:59] #gets cmac tag (is in byte array form)
+    received_cmac_hex = ''.join(format(x, '02x') for x in cmac_from_received_msg) #converts byte array to hex string
+    print("cmac received = ", received_cmac_hex)
+
+    Sx = bytes.fromhex("00000000111111112222222233333333") #key
+    c = cmac.CMAC(algorithms.AES(Sx)) #initialize cmac
+
+    print("unpacking received message: ")
+    for i in range(0,5,1):
+        data_to_cmac="".join(format(x, '02x') for x in msg.data[i:i+11])
+        print("i = ", i, ", data_to_cmac = ", data_to_cmac)
+        data_to_cmac_bytes= bytes(data_to_cmac, 'utf-8')
+        c.update(data_to_cmac_bytes)
+    data_to_cmac="".join(format(x, '02x') for x in msg.data[59:])
+    print("counter = ", data_to_cmac)
+
+    data_to_cmac_bytes= bytes(data_to_cmac, 'utf-8')
+    c.update(data_to_cmac_bytes)
+    expected_cmac_hex = c.finalize().hex()[:-24] 
+    print("expected cmac = ", expected_cmac_hex)
+    
+    return expected_cmac_hex == received_cmac_hex
 
 async def main() -> None:
     """The main function that runs in the loop."""
 
     reader = can.AsyncBufferedReader()
-    logger = can.Logger("logfile.asc")
+    #logger = can.Logger("logfile.asc")
 
     # Listeners are explained in [rtd]/listeners.html
     listeners: List[MessageRecipient] = [
@@ -47,7 +86,7 @@ async def main() -> None:
     #   them to listeners. [rtd]/api.html#notifier
     loop = asyncio.get_running_loop()
 
-    notifier = can.Notifier(bus0, listeners, loop=loop) 
+    notifier = can.Notifier(bus1, listeners, loop=loop) 
     #notifier = can.Notifier(bus1, listeners, loop=loop) 
 
 
@@ -73,19 +112,18 @@ async def main() -> None:
         # and go implement that in testinghex.py like a message each second or two (there is
         # like 500 or so of them (3550 / 5))
 
+        #bitfield or array (len 64) that keeps track of the last 64, keep track of the biggest seen 
+        # so far, if it's same size/smaller check array/bitfield to determine if valid/invalid
+        # goal: prevent replays & stale messages from getting through
+
+
+        if cmac_validate(msg):
+            print(color.GREEN, "Message Accepted: ", color.END, msg)
+        else:
+            print(color.RED, "Message Declined: ", color.END, msg)
 
 
 
-
-
-
-
-
-
-
-
-
-        print(msg)
         # Delay response
         ##await asyncio.sleep(0.5)
         msg.arbitration_id += 1
