@@ -34,7 +34,7 @@ bus1 = can.interfaces.socketcan.SocketcanBus(channel="vcan1", fd=True)
 
 def print_message(msg: can.Message) -> None:
     """Regular callback function. Can also be a coroutine."""
-    print(msg)
+    #print(msg)
 
 def fwd_1to0(msg: can.Message) -> None:
     """Regular callback function. Can also be a coroutine."""
@@ -45,24 +45,25 @@ def cmac_validate(msg):
     #indexs [55, 56, 57, 58, 59, 60, 61, 62, 63]  - cmac is held in 55-58 (4 bytes)
     cmac_from_received_msg = msg.data[55:59] #gets cmac tag (is in byte array form)
     received_cmac_hex = ''.join(format(x, '02x') for x in cmac_from_received_msg) #converts byte array to hex string
-    print("cmac received = ", received_cmac_hex)
+    #print("cmac received = ", received_cmac_hex)
 
     Sx = bytes.fromhex("00000000111111112222222233333333") #key
     c = cmac.CMAC(algorithms.AES(Sx)) #initialize cmac
 
-    print("unpacking received message: ")
+    #print("unpacking received message: ")
     for i in range(0,55,11):
-        data_to_cmac="".join(format(x, '02x') for x in msg.data[i:i+11]) # 0-11, 11-22, 22-33, 33-44, 44-55
-        print("i = ", i, ", data_to_cmac = ", data_to_cmac)
-        data_to_cmac_bytes= bytes(data_to_cmac, 'utf-8')
+        data_to_cmac="".join(format(x, '02x') for x in msg.data[i:i+11]).upper() # 0-11, 11-22, 22-33, 33-44, 44-55
+        #print("i = ", i, ", data_to_cmac = ", data_to_cmac)
+        data_to_cmac_bytes = bytes(data_to_cmac, 'utf-8')
+        #print(data_to_cmac_bytes)
         c.update(data_to_cmac_bytes)
     data_to_cmac="".join(format(x, '02x') for x in msg.data[59:]) #adding in the counter to cmac update
-    print("counter = ", data_to_cmac)
+    #print("counter = ", data_to_cmac)
 
     data_to_cmac_bytes= bytes(data_to_cmac, 'utf-8')
     c.update(data_to_cmac_bytes)
     expected_cmac_hex = c.finalize().hex()[:-24] 
-    print("expected cmac = ", expected_cmac_hex)
+    #print("expected cmac = ", expected_cmac_hex)
     
     return expected_cmac_hex == received_cmac_hex
 

@@ -82,7 +82,5 @@ for x in f:
         t+=1
         
     lineCount+=1
-    if lineCount == 11:
-        break
     #for i in range(len(data_msg)):
      #   print(hex(data_msg[i]))
