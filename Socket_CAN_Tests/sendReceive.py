@@ -51,12 +51,12 @@ def cmac_validate(msg):
     c = cmac.CMAC(algorithms.AES(Sx)) #initialize cmac
 
     print("unpacking received message: ")
-    for i in range(0,5,1):
-        data_to_cmac="".join(format(x, '02x') for x in msg.data[i:i+11])
+    for i in range(0,55,11):
+        data_to_cmac="".join(format(x, '02x') for x in msg.data[i:i+11]) # 0-11, 11-22, 22-33, 33-44, 44-55
         print("i = ", i, ", data_to_cmac = ", data_to_cmac)
         data_to_cmac_bytes= bytes(data_to_cmac, 'utf-8')
         c.update(data_to_cmac_bytes)
-    data_to_cmac="".join(format(x, '02x') for x in msg.data[59:])
+    data_to_cmac="".join(format(x, '02x') for x in msg.data[59:]) #adding in the counter to cmac update
     print("counter = ", data_to_cmac)
 
     data_to_cmac_bytes= bytes(data_to_cmac, 'utf-8')
