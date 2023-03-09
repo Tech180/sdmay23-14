@@ -28,7 +28,7 @@ last_time = 0
 #two ways to do time: 1) using timestamps from file, 2) using can-utils that uses time stamps from file for us
 #   could have reading on vcan0 while writing on vcan1 
 for x in f:
-    currentTime = x[24]
+    current_time = x[24]
     print(current_time)
 
     if(lineCount % 5 == 1): #happens once every 5 iterations, this is where cmac and monotonic need to go
