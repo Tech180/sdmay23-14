@@ -15,7 +15,8 @@
 // 4410.003274 1     0CFFFF8Cx        Rx    d 8 99 FF FF FF FF FF FF FF
 // 4419.128278 1     0J1939Tx        Rx    d 0 FF FF FF FF FF FF FF FF
 
-CAN_data_s read_CAN_data(char CAN_Dataline[]) {
+CAN_data_s read_CAN_data(char CAN_Dataline[])
+{
 
   CAN_data_s CAN_data;
   uint32_t data[8];
@@ -42,18 +43,21 @@ CAN_data_s read_CAN_data(char CAN_Dataline[]) {
   pgn_1 = (CAN_data.sender_ID & maskForPGN_1) / 0x10000;
   pgn_2 = (CAN_data.sender_ID & maskForPGN_2) / 0x0100;
 
-  if (scan_matches != 12) {
+  if (scan_matches != 12)
+  {
     CAN_data.valid = 0;
     return CAN_data;
   }
 
   // JAZ: a quick hack: If sender_ID = 0 this is not a valid packet
-  if (CAN_data.sender_ID == 0) {
+  if (CAN_data.sender_ID == 0)
+  {
     CAN_data.valid = 0;
     return CAN_data;
   }
   int i;
-  for (i = 0; i < CAN_data.data_len; i++) {
+  for (i = 0; i < CAN_data.data_len; i++)
+  {
     CAN_data.data[i] = (uint8_t)data[i];
   }
 
@@ -69,8 +73,9 @@ CAN_data_s read_CAN_data(char CAN_Dataline[]) {
   return CAN_data;
 }
 
-void print_CAN_data(CAN_data_s CAN_data) {
-  //FILE *outputfile = fopen("00x.txt", "a");
+void print_CAN_data(CAN_data_s CAN_data)
+{
+  FILE *outputfile = fopen("00x_time.txt", "a");
   printf("%lf %1x %08Xx %1X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X "
          "%02X\n",
          CAN_data.timestamp_sec, CAN_data.bus, CAN_data.sender_ID,
@@ -78,20 +83,20 @@ void print_CAN_data(CAN_data_s CAN_data) {
          CAN_data.data[2], CAN_data.data[3], CAN_data.data[4], CAN_data.data[5],
          CAN_data.data[6], CAN_data.data[7], CAN_data.data[8], CAN_data.data[9],
          CAN_data.data[10]);
-  /**
+
   fprintf(outputfile, "%02X %02X %02X %02X %02X %02X %02X %02X %02X %02X "
-         "%02X\n",
-         CAN_data.data[0], CAN_data.data[1],
-         CAN_data.data[2], CAN_data.data[3], CAN_data.data[4], CAN_data.data[5],
-         CAN_data.data[6], CAN_data.data[7], CAN_data.data[8], CAN_data.data[9],
-         CAN_data.data[10]);
-  */
-  
+                      "%02X %d\n",
+          CAN_data.data[0], CAN_data.data[1],
+          CAN_data.data[2], CAN_data.data[3], CAN_data.data[4], CAN_data.data[5],
+          CAN_data.data[6], CAN_data.data[7], CAN_data.data[8], CAN_data.data[9],
+          CAN_data.data[10], CAN_data.timestamp_sec);
+
   if (CAN_data.CMAC_data_len == 0)
     return;
   printf("CMAC encrypted data[%d]: ", CAN_data.CMAC_data_len);
   int i;
-  for (i = 0; i < CAN_data.CMAC_data_len; i++) {
+  for (i = 0; i < CAN_data.CMAC_data_len; i++)
+  {
     printf("%02X ", CAN_data.CMAC_data[i]);
   }
   printf("\n");
