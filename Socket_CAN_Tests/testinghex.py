@@ -4,19 +4,24 @@ from cryptography.hazmat.primitives import cmac
 from cryptography.hazmat.primitives.ciphers import algorithms
 
 bustype = 'socketcan'
-channel = 'vcan0'
+channel_0 = 'vcan0'
+channel_1 = 'vcan1'
 
 
 currentMonotonicCounter = [0, 0, 0, 0, 0] #each value holds 1 byte or up to 255
 t=1 #temp value each time to be stored / updating the montonic value's current byte
 #1,099,511,600,000
 #setting to CAN FD
-bus = can.interfaces.socketcan.SocketcanBus(channel=channel, fd=True) #setting bus to accept CanFD
+bus = can.interfaces.socketcan.SocketcanBus(channel=channel_1, fd=True) #setting bus to accept CanFD
 f = open("00x2.txt")
 lineCount = 1 #inFuture: convert to bytes to use as freshness value
 data_msg=[]
 Sx = bytes.fromhex("00000000111111112222222233333333") #key
 #reads 5 lines from the file, adding each to data_msg[], then creates msg to send on bus
+#TODO / Ideas:
+# have a way that a high priority message or X many milliseconds pass, then just send the FD frame
+#two ways to do time: 1) using timestamps from file, 2) using can-utils that uses time stamps from file for us
+#   could have reading on vcan0 while writing on vcan1 
 for x in f:
     if(lineCount % 5 == 1): #happens once every 5 iterations, this is where cmac and monotonic need to go
         c = cmac.CMAC(algorithms.AES(Sx)) #initialize cmac
