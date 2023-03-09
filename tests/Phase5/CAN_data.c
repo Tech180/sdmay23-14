@@ -84,12 +84,23 @@ void print_CAN_data(CAN_data_s CAN_data)
          CAN_data.data[6], CAN_data.data[7], CAN_data.data[8], CAN_data.data[9],
          CAN_data.data[10]);
 
+/** HAS SPACES AND DOES NOT CONTAIN TIME STAMP
   fprintf(outputfile, "%02X %02X %02X %02X %02X %02X %02X %02X %02X %02X "
-                      "%02X %d\n",
+                      "%02X\n",
+          CAN_data.data[0], CAN_data.data[1],
+          CAN_data.data[2], CAN_data.data[3], CAN_data.data[4], CAN_data.data[5],
+          CAN_data.data[6], CAN_data.data[7], CAN_data.data[8], CAN_data.data[9],
+          CAN_data.data[10]);
+*/
+
+  //CONTAINS TIME STAMP
+  fprintf(outputfile, "%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X %f\n",
           CAN_data.data[0], CAN_data.data[1],
           CAN_data.data[2], CAN_data.data[3], CAN_data.data[4], CAN_data.data[5],
           CAN_data.data[6], CAN_data.data[7], CAN_data.data[8], CAN_data.data[9],
           CAN_data.data[10], CAN_data.timestamp_sec);
+
+  fclose(outputfile);
 
   if (CAN_data.CMAC_data_len == 0)
     return;
