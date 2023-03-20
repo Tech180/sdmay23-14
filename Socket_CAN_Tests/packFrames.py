@@ -26,27 +26,31 @@ def handler(signum, frame):
   exit(1)
 signal.signal(signal.SIGINT, handler)
 
-reader = can.AsyncBufferedReader()
-listeners: List[MessageRecipient] = [
-    reader,         # AsyncBufferedReader() listener
-    fwd_1to0,       # Callback function
-]
-    
-loop = asyncio.get_running_loop()
-notifier = can.Notifier(timeBus, listeners, loop=loop) 
-
 #reads 5 lines from the file, adding each to data_msg[], then creates msg to send on bus
 #TODO / Ideas:
 # have a way that a high priority message or X many milliseconds pass, then just send the FD frame
 #two ways to do time: 1) using timestamps from file, 2) using can-utils that uses time stamps from file for us
 #   could have reading on vcan0 while writing on vcan1 
 async def main() -> None:
+
+    reader = can.AsyncBufferedReader()
+    listeners: List[MessageRecipient] = [
+        reader,         # AsyncBufferedReader() listener
+        fwd_1to0,       # Callback function
+    ]
+    
+    loop = asyncio.get_running_loop()
+    notifier = can.Notifier(timeBus, listeners, loop=loop) 
+
     while True:
         msg = await reader.get_message()
 
         if(lineCount % 5 == 1): #happens once every 5 iterations, this is where cmac and monotonic need to go
             c = cmac.CMAC(algorithms.AES(Sx)) #initialize cmac
         
+        print(msg)
+        break
+
         # 3 metadata bytes
         pgn_1 = x[16:18]
         pgn_2 = x[18:20]
@@ -108,3 +112,6 @@ async def main() -> None:
         lineCount+=1
         #for i in range(len(data_msg)):
         #   print(hex(data_msg[i]))
+
+if __name__ == "__main__":
+    asyncio.run(main())
