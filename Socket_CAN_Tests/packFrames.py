@@ -3,6 +3,10 @@ import can
 from cryptography.hazmat.primitives import cmac
 from cryptography.hazmat.primitives.ciphers import algorithms
 
+import signal
+import asyncio
+from typing import List
+
 bustype = 'socketcan'
 channel_0 = 'vcan0'
 channel_1 = 'vcan1'
@@ -12,7 +16,7 @@ t=1 #temp value each time to be stored / updating the montonic value's current b
 #1,099,511,600,000
 #setting to CAN FD
 bus = can.interfaces.socketcan.SocketcanBus(channel=channel_1, fd=True) #setting bus to accept CanFD
-timeBus = can.interfaces.socketcan.SocketcanBus(channel=channel_0, fd=True) #setting bus to accept CanFD
+timeBus = can.interfaces.socketcan.SocketcanBus(channel=channel_0) #setting bus to accept CanFD
 lineCount = 1 #inFuture: convert to bytes to use as freshness value
 data_msg=[]
 Sx = bytes.fromhex("00000000111111112222222233333333") #key
@@ -26,9 +30,9 @@ last_time = 0
 # have a way that a high priority message or X many milliseconds pass, then just send the FD frame
 #two ways to do time: 1) using timestamps from file, 2) using can-utils that uses time stamps from file for us
 #   could have reading on vcan0 while writing on vcan1 
-for x in f:
-    current_time = x[23:]
-    print(current_time)
+while True:
+    msg = await reader.get_message()
+
 
     if(lineCount % 5 == 1): #happens once every 5 iterations, this is where cmac and monotonic need to go
         c = cmac.CMAC(algorithms.AES(Sx)) #initialize cmac
