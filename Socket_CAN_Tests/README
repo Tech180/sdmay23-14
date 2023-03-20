@@ -1,0 +1,53 @@
+#CAN UTILS NOTES
+
+Install and basic info: https://elinux.org/Can-utils
+Simple Usage Video: https://www.youtube.com/watch?v=YDuGjqt1_lE
+
+Most basic example
+Have 2 terminals open!
+
+#In the first terminal type
+sudo modprobe vcan
+sudo ip link add dev vcan0 type vcan
+sudo ip link set up vcan0
+#This opens up vcan0 for communication
+
+
+#In the second terminal type
+candump vcan0
+#this dumps can messages to the terminal that are sent to vcan0 in real time
+#You may also run "candump vcan0 -l" to generate a log file
+
+#Lastly in the first terminal type
+cangen vcan0
+#CAN messages are now being generated through vcan0
+
+-------------------------------------------------------------------------------------------
+
+#SOCKET CAN NOTES
+Basic "send over bridge" from vcan0 to vcan0 using python and socketcan tutorial:
+
+commands to run:
+
+#This installs the python socketcan tool
+sudo apt update
+sudo apt install python3-can
+pip install socketcan
+
+#This opens vcan0 for communication
+sudo modprobe vcan
+sudo ip link add dev vcan0 type vcan
+sudo ip link set up vcan0
+
+#In a second terminal type
+candump vcan0
+
+
+#In the first terminal type (in sdmay23-14/Socket_CAN_Tests)
+python sendFrame.py
+
+You have sent a message through socketcan 
+
+More info regarding Socket-CAN: https://pypi.org/project/socketcan/
+This whole page is really useful for socketcan understanding: https://python-can.readthedocs.io/en/master/interfaces/socketcan.html#socketcan-quickstart
+

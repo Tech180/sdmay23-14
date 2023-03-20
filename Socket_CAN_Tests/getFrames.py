@@ -29,8 +29,8 @@ for x in f:
     
     if previous_time != 0 :
         time.sleep(current_time - previous_time)
-        print(current_time-previous_time)
+        #print(current_time-previous_time) #Print out the time between each message being sent
 
-    timeBus.send(msg) # this is where the magic happens
-    data_msg=[]
+    timeBus.send(msg)
+    data_msg=[] #data needs to be cleared so you aren't appending multiple messages together
     previous_time = current_time
