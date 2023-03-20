@@ -69,8 +69,7 @@ async def main() -> None:
         data_msg.append(int(pgn_2, 16))
         data_msg.append(int(source_address, 16))
 
-        madeReadable="".join(format(msg.data,'02x')).upper()
-
+        madeReadable="".join(format(x, '02x') for x in msg.data).upper()
         for i in range(0,15,2):
             data_msg.append(int(madeReadable[i:i+2],16)) # 8 bytes of data to be added to the list
             test += msg.data[i:i+2]
