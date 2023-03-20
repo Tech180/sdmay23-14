@@ -7,13 +7,12 @@ bustype = 'socketcan'
 channel_0 = 'vcan0'
 channel_1 = 'vcan1'
 
-
 currentMonotonicCounter = [0, 0, 0, 0, 0] #each value holds 1 byte or up to 255
 t=1 #temp value each time to be stored / updating the montonic value's current byte
 #1,099,511,600,000
 #setting to CAN FD
 bus = can.interfaces.socketcan.SocketcanBus(channel=channel_1, fd=True) #setting bus to accept CanFD
-f = open("00x_time.txt")
+timeBus = can.interfaces.socketcan.SocketcanBus(channel=channel_0, fd=True) #setting bus to accept CanFD
 lineCount = 1 #inFuture: convert to bytes to use as freshness value
 data_msg=[]
 Sx = bytes.fromhex("00000000111111112222222233333333") #key
@@ -28,7 +27,7 @@ last_time = 0
 #two ways to do time: 1) using timestamps from file, 2) using can-utils that uses time stamps from file for us
 #   could have reading on vcan0 while writing on vcan1 
 for x in f:
-    current_time = x[24:]
+    current_time = x[23:]
     print(current_time)
 
     if(lineCount % 5 == 1): #happens once every 5 iterations, this is where cmac and monotonic need to go
@@ -41,7 +40,7 @@ for x in f:
 
     #string we are using for cmac stuff
     test = ""
-    test += str(pgn_1)     
+    test += str(pgn_1)
     test += str(pgn_2)
     test += str(source_address)
     
@@ -53,8 +52,11 @@ for x in f:
     for i in range(0,15,2):
         data_msg.append(int(x[i:i+2], 16)) # 8 bytes of data to be added to the list
         test += x[i:i+2]
+        
     testToBytes = bytes(test, 'utf-8')
     c.update(testToBytes)
+
+    #Packing frames into FD frames
     if lineCount % 5 == 0: 
         counterInHex = hex(t).replace('0x', '')     
         for i in range(0,10-len(counterInHex)):
