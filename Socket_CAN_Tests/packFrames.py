@@ -47,13 +47,15 @@ async def main() -> None:
     notifier = can.Notifier(timeBus, listeners, loop=loop) 
 
     while True:
+        if lineCount == 12:
+            break
         msg = await reader.get_message()
 
         if(lineCount % 5 == 1): #happens once every 5 iterations, this is where cmac and monotonic need to go
             c = cmac.CMAC(algorithms.AES(Sx)) #initialize cmac
         
         #print(hex(msg.arbitration_id))
-        arbitration_ID = hex(msg.arbitration_id).replace("0x", "")
+        arbitration_ID = hex(msg.arbitration_id).replace("0x", "").upper()
         for i in range(0,6-len(arbitration_ID)):
             arbitration_ID = '0' + arbitration_ID
         pgn_1 = arbitration_ID[0:2]
@@ -109,18 +111,12 @@ async def main() -> None:
             data_msg.append(int(str(currentMonotonicCounter[4]), 16)) # 5 bytes of freshness value being added to canfd frame
             msg = can.Message(arbitration_id=0xabc123, data=data_msg, is_extended_id=True, is_fd=True) #function call involving can library to format it properly into a sendable canfd message for vcan0
             print(msg)
-            bus.send(msg) # this is where the magic happens
-            #print("can_data" + "pgn_1: " + pgn_1 + "pgn_2 " + pgn_2 + "source_address "+source_address+ )
-            #print("theory: " + test + first4Bytes + currentMonotonicCounter)
-            #print("real: ")
-            #print(msg)
-            #print(lineCount)
+            bus.send(msg)
+
             data_msg=[]
             t+=1
             
         lineCount+=1
-        #for i in range(len(data_msg)):
-        #   print(hex(data_msg[i]))
 
 if __name__ == "__main__":
     asyncio.run(main())

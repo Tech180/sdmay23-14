@@ -23,7 +23,6 @@ class color:
    UNDERLINE = '\033[4m'
    END = '\033[0m'
 
-
 #variables for monotonic counter (freshness value)
 last_64_freshness_values=[]
 idx_of_next_fv = 0
@@ -34,8 +33,8 @@ def handler(signum, frame):
   exit(1)
 signal.signal(signal.SIGINT, handler)
 
-bus0 = can.interfaces.socketcan.SocketcanBus(channel="vcan0", fd=True)
-bus1 = can.interfaces.socketcan.SocketcanBus(channel="vcan1", fd=True)
+bus1 = can.interfaces.socketcan.SocketcanBus(channel="vcan1", fd=True) #reads FD frames from packFrames.py
+bus2 = can.interfaces.socketcan.SocketcanBus(channel="vcan2") #sends normal CAN frames to ECU_1.py
 
 def print_message(msg: can.Message) -> None:
     """Regular callback function. Can also be a coroutine."""
@@ -47,31 +46,25 @@ def fwd_1to0(msg: can.Message) -> None:
     #bus1.send(msg)
 
 def cmac_validate(msg):
-    #indexs [55, 56, 57, 58, 59, 60, 61, 62, 63]  - cmac is held in 55-58 (4 bytes)
+    #indexs [..., 55, 56, 57, 58, 59, 60, 61, 62, 63]  - cmac is held in 55-58 (4 bytes)
     cmac_from_received_msg = msg.data[55:59] #gets cmac tag (is in byte array form)
     received_cmac_hex = ''.join(format(x, '02x') for x in cmac_from_received_msg) #converts byte array to hex string
-    #print("cmac received = ", received_cmac_hex)
 
     Sx = bytes.fromhex("00000000111111112222222233333333") #key
     c = cmac.CMAC(algorithms.AES(Sx)) #initialize cmac
 
-    #print("unpacking received message: ")
     for i in range(0,55,11):
         data_to_cmac="".join(format(x, '02x') for x in msg.data[i:i+11]).upper() # 0-11, 11-22, 22-33, 33-44, 44-55
-        #print("i = ", i, ", data_to_cmac = ", data_to_cmac)
         data_to_cmac_bytes = bytes(data_to_cmac, 'utf-8')
-        #print(data_to_cmac_bytes)
         c.update(data_to_cmac_bytes)
     data_to_cmac="".join(format(x, '02x') for x in msg.data[59:]) #adding in the counter to cmac update
-    #print("counter = ", data_to_cmac)
 
     data_to_cmac_bytes= bytes(data_to_cmac, 'utf-8')
     c.update(data_to_cmac_bytes)
     expected_cmac_hex = c.finalize().hex()[:-24] 
-    #print("expected cmac = ", expected_cmac_hex)
     
-    print("expcted cmac: ", expected_cmac_hex)
-    print("received cmac: ", received_cmac_hex)
+    #print("expcted cmac: ", expected_cmac_hex)
+    #print("received cmac: ", received_cmac_hex)
     return expected_cmac_hex == received_cmac_hex
 
 def update_fv_list(fv):
@@ -109,9 +102,21 @@ def validate_counter(msg):
     if int(received_fv, 16) in last_64_freshness_values:
         return False
     if int(received_fv, 16) < smallest_in_FV_list():
-       return False   
+       return False
     update_fv_list(received_fv)
     return True
+
+def unpack_FD_frame(msg):
+    data_msg=[] 
+
+    for i in range(0,55, 11):
+        data_msg="".join(format(x, '02x') for x in msg.data[i:i+11]).upper() # 0-11, 11-22, 22-33, 33-44, 44-55
+        arbitration_ID = data_msg[0:6]
+        data_msg=data_msg[6:]
+        data_msg2=[int(data_msg[0:2], 16), int(data_msg[2:4], 16), int(data_msg[4:6], 16), int(data_msg[6:8], 16), int(data_msg[8:10], 16), int(data_msg[10:12], 16), int(data_msg[12:14], 16), int(data_msg[14:], 16)]
+        
+        msg2 = can.Message(arbitration_id=int(arbitration_ID,16), data=data_msg2, is_extended_id=True)
+        bus2.send(msg2)
 
 async def main() -> None:
     """The main function that runs in the loop."""
@@ -166,6 +171,7 @@ async def main() -> None:
 
         if cmac_validate(msg) and validate_counter(msg):
             print(color.GREEN, "Message Accepted: ", color.END, msg)
+            unpack_FD_frame(msg)
         
         elif cmac_validate(msg) and not validate_counter(msg):
             print(color.YELLOW, "Message Fails Counter check: ", color.END, msg)
@@ -174,7 +180,6 @@ async def main() -> None:
             print(color.BLUE, "Message Fails CMAC check: ", color.END, msg)
         else: 
             print(color.RED, "Message Fails Both Counter and CMAC: ", color.END, msg)
-
 
         # Delay response
         ##await asyncio.sleep(0.5)
