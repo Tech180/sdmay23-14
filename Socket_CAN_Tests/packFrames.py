@@ -53,11 +53,12 @@ async def main() -> None:
             c = cmac.CMAC(algorithms.AES(Sx)) #initialize cmac
         
         #print(hex(msg.arbitration_id))
-
-        # 3 metadata bytes
-        pgn_1 = hex(msg.arbitration_id).replace("0x","")[0:2]
-        pgn_2 = hex(msg.arbitration_id).replace("0x","")[2:4]
-        source_address = hex(msg.arbitration_id).replace("0x","")[4:]
+        arbitration_ID = hex(msg.arbitration_id).replace("0x", "")
+        for i in range(0,6-len(arbitration_ID)):
+            arbitration_ID = '0' + arbitration_ID
+        pgn_1 = arbitration_ID[0:2]
+        pgn_2 = arbitration_ID[2:4]
+        source_address = arbitration_ID[4:]
 
         #string we are using for cmac stuff
         test = ""
@@ -65,12 +66,13 @@ async def main() -> None:
         test += str(pgn_2)
         test += str(source_address)
         
+        print(msg)
+
         #appending to list the meta data bytes
         data_msg.append(int(pgn_1, 16))
         data_msg.append(int(pgn_2, 16))
         data_msg.append(int(source_address, 16))
-
-        print(str(lineCount) + "   " + str(data_msg))
+        
 
         madeReadable="".join(format(x, '02x') for x in msg.data).upper()
         for i in range(0,15,2):

@@ -70,6 +70,8 @@ def cmac_validate(msg):
     expected_cmac_hex = c.finalize().hex()[:-24] 
     #print("expected cmac = ", expected_cmac_hex)
     
+    print("expcted cmac: ", expected_cmac_hex)
+    print("received cmac: ", received_cmac_hex)
     return expected_cmac_hex == received_cmac_hex
 
 def update_fv_list(fv):
@@ -88,21 +90,26 @@ def update_fv_list(fv):
         else:
             idx_of_next_fv+=1
 
+def smallest_in_FV_list():
+    global last_64_freshness_values
+    temp = last_64_freshness_values
+    temp.sort()
+    return temp[0]
+
 def validate_counter(msg):
     global largest_fv_seen
     global last_64_freshness_values
     global idx_of_next_fv
 
     received_fv="".join(format(x, '02x') for x in msg.data[59:])
-    # look back later at this v
     if int(received_fv, 16) > largest_fv_seen:
         largest_fv_seen = int(received_fv, 16)
         update_fv_list(received_fv)
         return True
     if int(received_fv, 16) in last_64_freshness_values:
         return False
-    #if int(received_fv, 16) < largest_fv_seen:
-    #   return False   
+    if int(received_fv, 16) < smallest_in_FV_list():
+       return False   
     update_fv_list(received_fv)
     return True
 
@@ -159,9 +166,14 @@ async def main() -> None:
 
         if cmac_validate(msg) and validate_counter(msg):
             print(color.GREEN, "Message Accepted: ", color.END, msg)
-        else:
-            print(color.RED, "Message Declined: ", color.END, msg)
+        
+        elif cmac_validate(msg) and not validate_counter(msg):
+            print(color.YELLOW, "Message Fails Counter check: ", color.END, msg)
 
+        elif not cmac_validate(msg) and validate_counter(msg):
+            print(color.BLUE, "Message Fails CMAC check: ", color.END, msg)
+        else: 
+            print(color.RED, "Message Fails Both Counter and CMAC: ", color.END, msg)
 
 
         # Delay response
