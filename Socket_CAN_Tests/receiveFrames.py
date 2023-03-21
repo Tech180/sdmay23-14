@@ -24,6 +24,11 @@ class color:
    END = '\033[0m'
 
 
+#variables for monotonic counter (freshness value)
+last_64_freshness_values=[]
+idx_of_next_fv = 0
+largest_fv_seen = 0
+
 # signal handler
 def handler(signum, frame):
   exit(1)
@@ -66,6 +71,40 @@ def cmac_validate(msg):
     #print("expected cmac = ", expected_cmac_hex)
     
     return expected_cmac_hex == received_cmac_hex
+
+def update_fv_list(fv):
+    global last_64_freshness_values
+    global idx_of_next_fv
+    if len(last_64_freshness_values) == 63:
+        last_64_freshness_values.append(int(fv, 16))
+        idx_of_next_fv = 0
+    elif len(last_64_freshness_values) < 63: 
+        last_64_freshness_values.append(int(fv, 16))
+        idx_of_next_fv+=1
+    else: #list contains 64 elements (start overriding oldest ones)
+        last_64_freshness_values[idx_of_next_fv]=fv
+        if idx_of_next_fv == 63:
+            idx_of_next_fv=0
+        else:
+            idx_of_next_fv+=1
+
+def validate_counter(msg):
+    global largest_fv_seen
+    global last_64_freshness_values
+    global idx_of_next_fv
+
+    received_fv="".join(format(x, '02x') for x in msg.data[59:])
+    # look back later at this v
+    if int(received_fv, 16) > largest_fv_seen:
+        largest_fv_seen = int(received_fv, 16)
+        update_fv_list(received_fv)
+        return True
+    if int(received_fv, 16) in last_64_freshness_values:
+        return False
+    #if int(received_fv, 16) < largest_fv_seen:
+    #   return False   
+    update_fv_list(received_fv)
+    return True
 
 async def main() -> None:
     """The main function that runs in the loop."""
@@ -118,7 +157,7 @@ async def main() -> None:
         # goal: prevent replays & stale messages from getting through
 
 
-        if cmac_validate(msg):
+        if cmac_validate(msg) and validate_counter(msg):
             print(color.GREEN, "Message Accepted: ", color.END, msg)
         else:
             print(color.RED, "Message Declined: ", color.END, msg)
