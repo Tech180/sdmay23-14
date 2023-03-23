@@ -62,7 +62,7 @@ int main(int argc, char **argv)
 		}
 
 		// We care about the CAN_senderID only
-		// if ((CAN_data.sender_ID & 0x000000FF) == CAN_senderID) {
+		//if ((CAN_data.sender_ID & 0x000000FF) == CAN_senderID) {
 		print_CAN_data(CAN_data);
 		get_CMAC_tag(&CAN_data, CMAC_count++);
 		if (CAN_data.CMAC_data_len != 0)
