@@ -30,7 +30,6 @@ async def main() -> None:
     while True:
         msg = await reader.get_message()
         print(msg)
-        #vcan1.send(msg)
 
 if __name__ == "__main__":
     asyncio.run(main())
