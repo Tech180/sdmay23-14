@@ -66,8 +66,6 @@ async def main() -> None:
         test += str(pgn_1)
         test += str(pgn_2)
         test += str(source_address)
-        
-        print(msg)
 
         #appending to list the meta data bytes
         data_msg.append(int(pgn_1, 16))
@@ -109,7 +107,6 @@ async def main() -> None:
             data_msg.append(int(str(currentMonotonicCounter[3]), 16)) # 5 bytes of freshness value being added to canfd frame
             data_msg.append(int(str(currentMonotonicCounter[4]), 16)) # 5 bytes of freshness value being added to canfd frame
             msg = can.Message(arbitration_id=0xabc123, data=data_msg, is_extended_id=True, is_fd=True) #function call involving can library to format it properly into a sendable canfd message for vcan0
-            print(msg)
             bus.send(msg)
 
             data_msg=[]
