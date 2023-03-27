@@ -1,25 +1,24 @@
-from . import addressConstants
+import addressConstants
+import time 
 
 # Address dictionary. Contains all addressable nodes in the network
-sourceAddrTable = {
-    "vcan2" : [SOURCE_ADDRESS_0, SOURCE_ADDRESS_1, SOURCE_ADDRESS_2, SOURCE_ADDRESS_3, SOURCE_ADDRESS_4],
-    "vcan0" : [SOURCE_ADDRESS_5, SOURCE_ADDRESS_6, SOURCE_ADDRESS_7, SOURCE_ADDRESS_8, SOURCE_ADDRESS_9]
+source_address_table = {
+    "vcan0" : [addressConstants.SOURCE_ADDRESS_8C, addressConstants.SOURCE_ADDRESS_13,
+                addressConstants.SOURCE_ADDRESS_22, addressConstants.SOURCE_ADDRESS_C5, 
+                addressConstants.SOURCE_ADDRESS_47],
+    "vcan2" : [addressConstants.SOURCE_ADDRESS_00, addressConstants.SOURCE_ADDRESS_F0, 
+               addressConstants.SOURCE_ADDRESS_1C, addressConstants.SOURCE_ADDRESS_05, 
+               addressConstants.SOURCE_ADDRESS_1E]
+    
 }
-
-isAddrInTable = False
 
 # Iterate through dictionary and test if source_address matches an address in the dictionary
 # TODO: Possibly optimize function if too slow for our use-case ( currently running O^2 time :\ ) 
-def lookForAddr(source_address):
-    for channel in sourceAddrTable:
-        for addr in channel:
-            if(addr == source_addr):
-                isAddrInTable = True
-                break
-        else: 
-            continue
-        break
-    
-    return isAddrInTable
+def get_channel(source_address):
+    for channel in source_address_table:
+        for address in source_address_table.get(channel):
+            if address == source_address:
+                return channel
+    return ""
 
 

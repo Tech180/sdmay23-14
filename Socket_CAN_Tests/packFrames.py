@@ -3,11 +3,12 @@ import can
 from cryptography.hazmat.primitives import cmac
 from cryptography.hazmat.primitives.ciphers import algorithms
 from can.message import Message
-from lookupRoutine import lookForAddr
 
 import signal
 import asyncio
 from typing import List
+
+from lookupRoutine import get_channel
 
 bustype = 'socketcan'
 channel_0 = 'vcan0'
@@ -48,25 +49,25 @@ async def main() -> None:
     loop = asyncio.get_running_loop()
     notifier = can.Notifier(timeBus, listeners, loop=loop) 
 
+
+    #moving forward: check if message should be included (broadcast or SA in table for vcan2)
+
     while True:
         msg = await reader.get_message()
-
-        if(lineCount % 5 == 1): #happens once every 5 iterations, this is where cmac and monotonic need to go
-            c = cmac.CMAC(algorithms.AES(Sx)) #initialize cmac
-        
-        #print(hex(msg.arbitration_id))
         arbitration_ID = hex(msg.arbitration_id).replace("0x", "").upper()
         for i in range(0,6-len(arbitration_ID)):
             arbitration_ID = '0' + arbitration_ID
-        pgn_1 = arbitration_ID[0:2]
-        pgn_2 = arbitration_ID[2:4]
         source_address = arbitration_ID[4:]
-
-        # Test if the given source address matches one in the network
-        isAddrInNetwork = lookForAddr(source_address)
-
-        # Only proceed if the given source address is within the network
-        if(isAddrInNetwork):
+        print(lineCount, source_address, type(source_address), get_channel(source_address))
+        if get_channel(source_address) == "vcan2":
+            #print("passed")
+            #time.sleep(5)
+            if(lineCount % 5 == 1): #happens once every 5 iterations, this is where cmac and monotonic need to go
+                c = cmac.CMAC(algorithms.AES(Sx)) #initialize cmac
+            
+            pgn_1 = arbitration_ID[0:2]
+            pgn_2 = arbitration_ID[2:4]
+            source_address = arbitration_ID[4:]
 
             #string we are using for cmac stuff
             test = ""
