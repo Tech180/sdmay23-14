@@ -29,14 +29,10 @@ def handler(signum, frame):
     exit(1)
 signal.signal(signal.SIGINT, handler) 
 
-<<<<<<< HEAD
 # convert to speed and include backwards compatibility with can and canfd
 def speed(mph, extended):
     #1/256 mps
-=======
-#get speed values
-def speed(mph):
->>>>>>> 55dfaf42cae38859d95133d28399d599c4db08ce
+
     mps = mph / 2.23694 #convert mph to meter/sec
     
     # 64 bytes long
