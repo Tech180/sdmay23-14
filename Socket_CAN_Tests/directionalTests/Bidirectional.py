@@ -3,7 +3,7 @@ import can
 import math
 from cryptography.hazmat.primitives import cmac
 from cryptography.hazmat.primitives.ciphers import algorithms
-from can.message import Message
+#from can.message import Message
 #from can.listener import MessageRecipient
 
 import signal
