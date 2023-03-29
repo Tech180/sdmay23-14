@@ -1,5 +1,6 @@
 import time
 import can
+import math
 from cryptography.hazmat.primitives import cmac
 from cryptography.hazmat.primitives.ciphers import algorithms
 from can.message import Message
@@ -11,7 +12,13 @@ from typing import List
 #Set variables equal to virtual busses running on system
 bustype = 'socketcan'
 channel_0 = 'vcan0'
+channel_1 = 'vcan1'
 channel_2 = 'vcan2'
+
+#Create variables for socketCAN bus channels
+vcan0 = can.interfaces.socketcan.SocketcanBus(channel=channel_0)
+vcan1 = can.interfaces.socketcan.SocketcanBus(channel=channel_1)
+vcan2 = can.interfaces.socketcan.SocketcanBus(channel=channel_2)
 
 def handler(signum, frame):
     global dolog, f
@@ -20,6 +27,7 @@ def handler(signum, frame):
     exit(1)
 signal.signal(signal.SIGINT, handler) 
 
+#get speed values
 def speed(mph):
     mps = mph / 2.23694 #convert mph to meter/sec
     byte2 = math.floor(mps/0.256) #convert m/s to bytes
@@ -27,7 +35,7 @@ def speed(mph):
     return byte1, byte2
 
 #convert hex message to mph
-def pgn(msg)
+def pgn(msg):
     arbitration_ID = hex(msg.arbitration_id).replace("0x", "").upper()
     pgn_1 = arbitration_ID[0:2]
     pgn_2 = arbitration_ID[2:4]
@@ -35,9 +43,28 @@ def pgn(msg)
     mph = mps * 2.23694
     return pgn_1, pgn_2, mph
 
-#Create variables for socketCAN bus channels
-vcan0 = can.interfaces.socketcan.SocketcanBus(channel=channel_0)
-vcan2 = can.interfaces.socketcan.SocketcanBus(channel=channel_2)
+def fwd_0to1(msg: can.Message) -> None:
+        global channel_0
+        msg = sniffPGN(msg)
+        channel_1.send(msg)
+
+def fwd_1to2(msg: can.Message) -> None:
+        global channel_1
+        msg = sniffPGN(msg)
+        channel_2.send(msg)
+
+def fwd_2to1(msg: can.Message) -> None:
+        global channel_2
+        msg = sniffPGN(msg)
+        channel_1.send(msg)
+
+def fwd_1to0(msg: can.Message) -> None:
+        global channel_1
+        msg = sniffPGN(msg)
+        channel_0.send(msg)
+
+
+
 
 def sniffPGN(msg):
     arbitration_ID = hex(msg.arbitration_id).replace("0x", "").upper()  #arbitration_ID containing pgn_1 and pgn_2
@@ -52,6 +79,7 @@ def sniffPGN(msg):
        pgn_2 == "8C" or pgn_2 == "13" or pgn_2 == "22" or pgn_2 == "C5" or pgn_2 == "47" or 
        int(pgn_1,16) >= 240):  #Sniffing the values to print
         print(msg)
+        
 
 
 async def main() -> None:
@@ -59,13 +87,19 @@ async def main() -> None:
 
     listeners: List[MessageRecipient] = [
         reader,         # AsyncBufferedReader() listener
+        fwd_0to1,       # Callback function
+        fwd_1to2,       # Callback function
+        fwd_2to1,       # Callback function
+        fwd_1to0        # Callback function
     ]
 
     loop = asyncio.get_running_loop()
-    notifier = can.Notifier(vcan2, listeners, loop=loop) 
+    notifier = can.Notifier(vcan0, vcan1, vcan2, listeners, loop=loop) 
 
     while True:
         msg = await reader.get_message()
+        pgn(msg)
+        speed(msg)
         sniffPGN(msg)
 
 if __name__ == "__main__":
