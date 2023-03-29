@@ -17,6 +17,11 @@ channel_0 = 'vcan0'
 channel_1 = 'vcan1'
 channel_2 = 'vcan2'
 
+#Create variables for socketCAN bus channels
+vcan0 = can.interfaces.socketcan.SocketcanBus(channel=channel_0)
+vcan1 = can.interfaces.socketcan.SocketcanBus(channel=channel_1)
+vcan2 = can.interfaces.socketcan.SocketcanBus(channel=channel_2)
+
 def handler(signum, frame):
     global dolog, f
     if dolog:
@@ -24,9 +29,14 @@ def handler(signum, frame):
     exit(1)
 signal.signal(signal.SIGINT, handler) 
 
+<<<<<<< HEAD
 # convert to speed and include backwards compatibility with can and canfd
 def speed(mph, extended):
     #1/256 mps
+=======
+#get speed values
+def speed(mph):
+>>>>>>> 55dfaf42cae38859d95133d28399d599c4db08ce
     mps = mph / 2.23694 #convert mph to meter/sec
     
     # 64 bytes long
@@ -61,6 +71,26 @@ vcan0 = can.interfaces.socketcan.SocketcanBus(channel=channel_0)
 vcan1 = can.interfaces.socketcan.SocketcanBus(channel=channel_1)
 vcan2 = can.interfaces.socketcan.SocketcanBus(channel=channel_2)
 
+def fwd_0to1(msg: can.Message) -> None:
+        global channel_0
+        msg = sniffPGN(msg)
+        channel_1.send(msg)
+
+def fwd_1to2(msg: can.Message) -> None:
+        global channel_1
+        msg = sniffPGN(msg)
+        channel_2.send(msg)
+
+def fwd_2to1(msg: can.Message) -> None:
+        global channel_2
+        msg = sniffPGN(msg)
+        channel_1.send(msg)
+
+def fwd_1to0(msg: can.Message) -> None:
+        global channel_1
+        msg = sniffPGN(msg)
+        channel_0.send(msg)
+
 def sniffPGN(msg):
     arbitration_ID = hex(msg.arbitration_id).replace("0x", "").upper()  #arbitration_ID containing pgn_1 and pgn_2
 
@@ -74,6 +104,7 @@ def sniffPGN(msg):
        pgn_2 == "8C" or pgn_2 == "13" or pgn_2 == "22" or pgn_2 == "C5" or pgn_2 == "47" or 
        int(pgn_1,16) >= 240):  #Sniffing the values to print
         print(msg)
+        
 
 
 async def bridge(bus1, bus2):
