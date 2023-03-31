@@ -19,6 +19,30 @@ channel_1 = 'vcan1'
 bus = can.interfaces.socketcan.SocketcanBus(channel=channel_1, fd=True) #setting bus to accept CanFD
 timeBus = can.interfaces.socketcan.SocketcanBus(channel=channel_0) #setting bus to accept CanFD
 
+
+
+# def time_to_listen():
+
+#     reader2 = can.AsyncBufferedReader()
+
+#     listeners2: List[MessageRecipient] = [
+#         reader2       # AsyncBufferedReader() listener
+#     ]
+    
+#     loop2 = asyncio.get_running_loop()
+#     notifier2 = can.Notifier(bus, listeners2, loop=loop2)
+
+#     while True:
+#         listenCounter = 0
+        
+#         msg_received = await reader2.get_message()
+#         print("RECEIVED MESSAGE: ", msg_received)
+#         listenCounter+=1
+#         if listenCounter == 5:
+#             break
+
+
+
 def handler(signum, frame):
   exit(1)
 signal.signal(signal.SIGINT, handler)
@@ -49,6 +73,14 @@ async def main() -> None:
     loop = asyncio.get_running_loop()
     notifier = can.Notifier(timeBus, listeners, loop=loop) 
 
+    # reader2 = can.AsyncBufferedReader()
+
+    # listeners2: List[MessageRecipient] = [
+    # reader2       # AsyncBufferedReader() listener
+    # ]
+
+    #loop2 = asyncio.get_running_loop()
+    notifier2 = can.Notifier(bus, listeners, loop=loop)
 
     #moving forward: check if message should be included (broadcast or SA in table for vcan2)
 
@@ -58,7 +90,7 @@ async def main() -> None:
         for i in range(0,6-len(arbitration_ID)):
             arbitration_ID = '0' + arbitration_ID
         source_address = arbitration_ID[4:]
-        print(lineCount, source_address, type(source_address), get_channel(source_address))
+        #print(lineCount, source_address, type(source_address), get_channel(source_address))
         if get_channel(source_address) == "vcan2":
             #print("passed")
             #time.sleep(5)
@@ -75,7 +107,7 @@ async def main() -> None:
             test += str(pgn_2)
             test += str(source_address)
             
-            print(msg)
+            #print(msg)
 
             #appending to list the meta data bytes
             data_msg.append(int(pgn_1, 16))
@@ -117,13 +149,28 @@ async def main() -> None:
                 data_msg.append(int(str(currentMonotonicCounter[3]), 16)) # 5 bytes of freshness value being added to canfd frame
                 data_msg.append(int(str(currentMonotonicCounter[4]), 16)) # 5 bytes of freshness value being added to canfd frame
                 msg = can.Message(arbitration_id=0xabc123, data=data_msg, is_extended_id=True, is_fd=True) #function call involving can library to format it properly into a sendable canfd message for vcan0
-                print(msg)
+                print("SENDING: ", msg)
                 bus.send(msg)
 
+                #msg_received = await reader.get_message()
+                #print("RECEIVED MESSAGE: ", msg_received)
                 data_msg=[]
                 t+=1
                 
             lineCount+=1
+
+        if lineCount==5:
+            notifier2 = can.Notifier(bus, listeners, loop=loop)
+            #time_to_listen()
+            listenCounter = 0
+            while True:
+                msg_received = await reader.get_message()
+                print("RECEIVED MESSAGE: ", msg_received)
+                print("counter = ", listenCounter)
+                listenCounter+=1
+                if listenCounter >= 5:
+                    break
+            notifier2 = can.Notifier(timeBus, listeners, loop=loop)
 
 if __name__ == "__main__":
     asyncio.run(main())

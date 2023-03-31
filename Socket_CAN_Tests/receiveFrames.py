@@ -118,10 +118,17 @@ def unpack_FD_frame(msg):
         msg2 = can.Message(arbitration_id=int(arbitration_ID,16), data=data_msg2, is_extended_id=True)
         bus2.send(msg2)
 
+def send_in_bulk(msg_list):
+    for msg in msg_list:
+        bus1.send(msg)
+
 async def main() -> None:
     """The main function that runs in the loop."""
 
+    messagesReceived=0
+
     reader = can.AsyncBufferedReader()
+    #reader2 = can.AsyncBufferedReader()
     #logger = can.Logger("logfile.asc")
 
     # Listeners are explained in [rtd]/listeners.html
@@ -131,7 +138,12 @@ async def main() -> None:
         ##logger,        # Regular Listener object
         fwd_1to0,       # Callback function
     ]
-    
+    # listeners2: List[MessageRecipient] = [
+    #     ##print_message,  # Callback function
+    #     reader2,         # AsyncBufferedReader() listener
+    #     ##logger,        # Regular Listener object
+    #     fwd_1to0,       # Callback function
+    # ]
     # Create Notifier with an explicit loop to use for scheduling of callbacks
     #   notifier is used as a message distributor for a bus. Notifier
     #   creates a thread to read messages from the bus and distributes
@@ -139,12 +151,13 @@ async def main() -> None:
     loop = asyncio.get_running_loop()
 
     notifier = can.Notifier(bus1, listeners, loop=loop) 
+    #notifier2 = can.Notifier(bus1, listeners, loop=loop)
     #notifier = can.Notifier(bus1, listeners, loop=loop) 
 
 
     # Start sending first message
     ##bus.send(can.Message(arbitration_id=0))
-
+    message_list=[]
     print("forwarding from vcan1 to vcan0 -- use 'cansniffer' to watch traffic")
     print("                               -- ^c to quit")
     while True:
@@ -180,6 +193,15 @@ async def main() -> None:
             print(color.BLUE, "Message Fails CMAC check: ", color.END, msg)
         else: 
             print(color.RED, "Message Fails Both Counter and CMAC: ", color.END, msg)
+
+        message_list.append(msg)
+        messagesReceived+=1
+
+        if messagesReceived==5:
+            send_in_bulk(message_list)
+            messagesReceived=0
+            message_list=[]
+
 
         # Delay response
         ##await asyncio.sleep(0.5)
