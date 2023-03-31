@@ -17,8 +17,8 @@ channel_1 = 'vcan1'
 vcan1 = can.interfaces.socketcan.SocketcanBus(channel=channel_1)
 vcan2 = can.interfaces.socketcan.SocketcanBus(channel=channel_2)
 
-#Sniffs PGN values equal to 1CFE or broadcast PGN values equal to 240 or greater
-def sniffPGN(msg):
+#Sniffs PGN_2 value (destination address) equal to FE or PGN_1 value equal to 240 or greater (broadcast message)
+def sniffPGN_Broadcast(msg):
     arbitration_ID = hex(msg.arbitration_id).replace("0x", "").upper()  #arbitration_ID containing pgn_1 and pgn_2
 
     for i in range(0,6-len(arbitration_ID)):
@@ -27,12 +27,25 @@ def sniffPGN(msg):
     pgn_1 = arbitration_ID[0:2]
     pgn_2 = arbitration_ID[2:4]
 
-    if(pgn_1+pgn_2 == "1CFE" or int(pgn_1,16) >= 240):  #Sniffing the values to print
+    if((pgn_2 == "FE" and int(pgn_1,16) < 240) or int(pgn_1,16) >= 240):  #Sniffing the values to print
+        print(msg)
+
+#Only sniffs direct messages (no broadcast messages)
+def sniffPGN_direct(msg):
+    arbitration_ID = hex(msg.arbitration_id).replace("0x", "").upper()  #arbitration_ID containing pgn_1 and pgn_2
+
+    for i in range(0,6-len(arbitration_ID)):
+        arbitration_ID = '0' + arbitration_ID   #Adding leading zeros to ID
+
+    pgn_1 = arbitration_ID[0:2]
+    pgn_2 = arbitration_ID[2:4]
+
+    if((pgn_2 == "FE" and int(pgn_1,16) < 240)):  #Sniffing the values to print
         print(msg)
 
 async def main() -> None:
     reader = can.AsyncBufferedReader()
-
+    mode = 1
     listeners: List[MessageRecipient] = [
         reader,         # AsyncBufferedReader() listener
     ]
@@ -42,7 +55,10 @@ async def main() -> None:
 
     while True:
         msg = await reader.get_message()
-        sniffPGN(msg)
+        if(mode == 0):
+            sniffPGN_Broadcast(msg)
+        else:
+            sniffPGN_direct(msg)
 
 if __name__ == "__main__":
     asyncio.run(main())
