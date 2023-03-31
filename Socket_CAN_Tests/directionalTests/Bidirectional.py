@@ -43,28 +43,40 @@ def pgn(msg):
     mph = mps * 2.23694
     return pgn_1, pgn_2, mph
 
+def default_0(msg: can.Message) -> None:
+        global channel_0
+        msg = sniffPGN(msg)
+        pgn(msg)
+        speed(msg)
+        channel_0.send(msg)
+
 def fwd_0to1(msg: can.Message) -> None:
         global channel_0
         msg = sniffPGN(msg)
+        pgn(msg)
+        speed(msg)
         channel_1.send(msg)
 
 def fwd_1to2(msg: can.Message) -> None:
         global channel_1
         msg = sniffPGN(msg)
+        pgn(msg)
+        speed(msg)
         channel_2.send(msg)
 
 def fwd_2to1(msg: can.Message) -> None:
         global channel_2
         msg = sniffPGN(msg)
+        pgn(msg)
+        speed(msg)
         channel_1.send(msg)
 
 def fwd_1to0(msg: can.Message) -> None:
         global channel_1
         msg = sniffPGN(msg)
+        pgn(msg)
+        speed(msg)
         channel_0.send(msg)
-
-
-
 
 def sniffPGN(msg):
     arbitration_ID = hex(msg.arbitration_id).replace("0x", "").upper()  #arbitration_ID containing pgn_1 and pgn_2
@@ -79,8 +91,6 @@ def sniffPGN(msg):
        pgn_2 == "8C" or pgn_2 == "13" or pgn_2 == "22" or pgn_2 == "C5" or pgn_2 == "47" or 
        int(pgn_1,16) >= 240):  #Sniffing the values to print
         print(msg)
-        
-
 
 async def main() -> None:
     reader = can.AsyncBufferedReader()
@@ -93,14 +103,19 @@ async def main() -> None:
         fwd_1to0        # Callback function
     ]
 
-    loop = asyncio.get_running_loop()
-    notifier = can.Notifier(vcan0, vcan1, vcan2, listeners, loop=loop) 
+    loop0 = asyncio.get_running_loop()
+    notifier0 = can.Notifier(vcan0, listeners, loop=loop0) 
+    loop1 = asyncio.get_running_loop()
+    notifier1 = can.Notifier(vcan1, listeners, loop=loop1)
+    loop2 = asyncio.get_running_loop()
+    notifier2 = can.Notifier(vcan2, listeners, loop=loop2)
 
     while True:
         msg = await reader.get_message()
-        pgn(msg)
-        speed(msg)
-        sniffPGN(msg)
-
+        fwd_0to1(msg)
+        fwd_1to2(msg)
+        fwd_2to1(msg)
+        fwd_1to0(msg)
+        
 if __name__ == "__main__":
     asyncio.run(main())
