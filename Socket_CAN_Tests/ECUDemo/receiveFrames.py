@@ -36,6 +36,10 @@ signal.signal(signal.SIGINT, handler)
 bus1 = can.interfaces.socketcan.SocketcanBus(channel="vcan1", fd=True) #reads FD frames from packFrames.py
 bus2 = can.interfaces.socketcan.SocketcanBus(channel="vcan2") #sends normal CAN frames to ECU_1.py
 
+def print_message(msg: can.Message) -> None:
+    """Regular callback function. Can also be a coroutine."""
+    #print(msg)
+
 def fwd_1to0(msg: can.Message) -> None:
     """Regular callback function. Can also be a coroutine."""
     bus1.send(msg)
@@ -59,6 +63,8 @@ def cmac_validate(msg):
     c.update(data_to_cmac_bytes)
     expected_cmac_hex = c.finalize().hex()[:-24] 
     
+    #print("expcted cmac: ", expected_cmac_hex)
+    #print("received cmac: ", received_cmac_hex)
     return expected_cmac_hex == received_cmac_hex
 
 def update_fv_list(fv):
@@ -120,6 +126,7 @@ async def main() -> None:
 
     # Listeners are explained in [rtd]/listeners.html
     listeners: List[MessageRecipient] = [
+        ##print_message,  # Callback function
         reader,         # AsyncBufferedReader() listener
         ##logger,        # Regular Listener object
         fwd_1to0,       # Callback function
@@ -138,6 +145,8 @@ async def main() -> None:
     # Start sending first message
     ##bus.send(can.Message(arbitration_id=0))
 
+    print("forwarding from vcan1 to vcan0 -- use 'cansniffer' to watch traffic")
+    print("                               -- ^c to quit")
     while True:
         # Wait for next message from AsyncBufferedReader
         msg = await reader.get_message()
@@ -161,7 +170,16 @@ async def main() -> None:
 
 
         if cmac_validate(msg) and validate_counter(msg):
+            print(color.GREEN, "Message Accepted: ", color.END, msg)
             unpack_FD_frame(msg)
+        
+        elif cmac_validate(msg) and not validate_counter(msg):
+            print(color.YELLOW, "Message Fails Counter check: ", color.END, msg)
+
+        elif not cmac_validate(msg) and validate_counter(msg):
+            print(color.BLUE, "Message Fails CMAC check: ", color.END, msg)
+        else: 
+            print(color.RED, "Message Fails Both Counter and CMAC: ", color.END, msg)
 
         # Delay response
         ##await asyncio.sleep(0.5)
@@ -170,6 +188,7 @@ async def main() -> None:
 
     # Wait for last message to arrive
     await reader.get_message()
+    print("Done!")
 
     # Clean-up
     notifier.stop()
