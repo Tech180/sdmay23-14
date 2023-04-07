@@ -11,6 +11,8 @@ import signal
 from cryptography.hazmat.primitives import cmac
 from cryptography.hazmat.primitives.ciphers import algorithms
 
+from packFrames import isBusFree
+
 class color:
    PURPLE = '\033[95m'
    CYAN = '\033[96m'
@@ -42,7 +44,7 @@ def print_message(msg: can.Message) -> None:
 
 def fwd_1to0(msg: can.Message) -> None:
     """Regular callback function. Can also be a coroutine."""
-    bus1.send(msg)
+    #bus1.send(msg)
     #bus1.send(msg)
 
 def cmac_validate(msg):
@@ -125,6 +127,8 @@ def send_in_bulk(msg_list):
 async def main() -> None:
     """The main function that runs in the loop."""
 
+    global isBusFree
+
     messagesReceived=0
 
     reader = can.AsyncBufferedReader()
@@ -194,11 +198,14 @@ async def main() -> None:
         else: 
             print(color.RED, "Message Fails Both Counter and CMAC: ", color.END, msg)
 
-        message_list.append(msg)
-        messagesReceived+=1
+        if messagesReceived <= 5: 
+            message_list.append(msg)
+            messagesReceived+=1
 
-        if messagesReceived==5:
+        if isBusFree and messagesReceived == 5:
+            isBusFree = False
             send_in_bulk(message_list)
+            isBusFree = True
             messagesReceived=0
             message_list=[]
 
