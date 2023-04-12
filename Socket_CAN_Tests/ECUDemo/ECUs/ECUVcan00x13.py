@@ -11,23 +11,31 @@ from typing import List
 #Set variables equal to virtual busses running on system
 bustype = 'socketcan'
 channel_0 = 'vcan0'
-channel_1 = 'vcan1'
 
 #Create variables for socketCAN bus channels
 vcan0 = can.interfaces.socketcan.SocketcanBus(channel=channel_0)
-vcan1 = can.interfaces.socketcan.SocketcanBus(channel=channel_1)
 
-#Sniffs PGN values equal to 1CFE or broadcast PGN values equal to 240 or greater
-def sniffPGN(msg):
+#Sniffs PGN values equal to 13 or broadcast PGN values equal to 240 or greater
+def sniffPGN_Broadcast(msg):
     arbitration_ID = hex(msg.arbitration_id).replace("0x", "").upper()  #arbitration_ID containing pgn_1 and pgn_2
 
     for i in range(0,6-len(arbitration_ID)):
         arbitration_ID = '0' + arbitration_ID   #Adding leading zeros to ID
 
     pgn_1 = arbitration_ID[0:2]
-    pgn_2 = arbitration_ID[2:4]
 
-    if(pgn_2 == "13" or int(pgn_1,16) >= 240):  #Sniffing the values to print
+    if((pgn_1 == "13" and int(pgn_1,16) < 240) or int(pgn_1,16) >= 240):  #Sniffing the values to print
+        print(msg)
+
+def sniffPGN_Direct(msg):
+    arbitration_ID = hex(msg.arbitration_id).replace("0x", "").upper()  #arbitration_ID containing pgn_1 and pgn_2
+
+    for i in range(0,6-len(arbitration_ID)):
+        arbitration_ID = '0' + arbitration_ID   #Adding leading zeros to ID
+
+    pgn_1 = arbitration_ID[0:2]
+
+    if(pgn_1 == "13" and int(pgn_1,16) < 240):  #Sniffing the values to print
         print(msg)
 
 async def main() -> None:
@@ -42,7 +50,8 @@ async def main() -> None:
 
     while True:
         msg = await reader.get_message()
-        sniffPGN(msg)
+        #sniffPGN_Broadcast(msg)
+        sniffPGN_Direct(msg)
 
 if __name__ == "__main__":
     asyncio.run(main())
