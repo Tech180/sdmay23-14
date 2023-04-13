@@ -108,6 +108,9 @@ async def main() -> None:
             data_msg.append(int(str(currentMonotonicCounter[4]), 16)) # 5 bytes of freshness value being added to canfd frame
             msg = can.Message(arbitration_id=0xabc123, data=data_msg, is_extended_id=True, is_fd=True) #function call involving can library to format it properly into a sendable canfd message for vcan0
             bus.send(msg)
+            if (msg==None):
+                print("Message is empty")
+            asyncio.sleep(5)
 
             data_msg=[]
             t+=1

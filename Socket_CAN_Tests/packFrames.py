@@ -14,8 +14,6 @@ bustype = 'socketcan'
 channel_0 = 'vcan0'
 channel_1 = 'vcan1'
 
-isBusFree = True 
-
 #1,099,511,600,000
 #setting to CAN FD
 bus = can.interfaces.socketcan.SocketcanBus(channel=channel_1, fd=True) #setting bus to accept CanFD
@@ -63,9 +61,13 @@ async def main() -> None:
 
     #moving forward: check if message should be included (broadcast or SA in table for vcan2)
 
-    global isBusFree
+
 
     while True:
+        #msg=None
+        #if (msg==None):
+        #    print("Message is empty")
+        #asyncio.sleep(5)
         msg = await reader.get_message()
         channel1Msgs = await channel1reader.get_message()
 
@@ -109,8 +111,7 @@ async def main() -> None:
             c.update(testToBytes)
 
             #Packing frames into FD frames
-            if lineCount % 5 == 0 and isBusFree: 
-                isBusFree = False
+            if lineCount % 5 == 0: 
                 counterInHex = hex(t).replace('0x', '')     
                 for i in range(0,10-len(counterInHex)):
                     counterInHex = '0' + counterInHex
@@ -137,9 +138,9 @@ async def main() -> None:
                 msg = can.Message(arbitration_id=0xabc123, data=data_msg, is_extended_id=True, is_fd=True) #function call involving can library to format it properly into a sendable canfd message for vcan0
                 print(msg)
                 bus.send(msg)
-
-                isBusFree = True
-
+                if (msg==None):
+                    print("Message is empty")
+                asyncio.sleep(5)
 
                 data_msg=[]
                 t+=1

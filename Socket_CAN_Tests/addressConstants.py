@@ -1,7 +1,7 @@
 """Project-wide source address constants"""
 
 # vcan0
-SOURCE_ADDRESS_8C = "04" # change back to 8C
+SOURCE_ADDRESS_8C = "8C"
 SOURCE_ADDRESS_13 = "13"
 SOURCE_ADDRESS_22 = "22"
 SOURCE_ADDRESS_C5 = "C5"

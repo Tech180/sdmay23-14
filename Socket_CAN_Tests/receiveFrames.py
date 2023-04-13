@@ -11,8 +11,6 @@ import signal
 from cryptography.hazmat.primitives import cmac
 from cryptography.hazmat.primitives.ciphers import algorithms
 
-from packFrames import isBusFree
-
 class color:
    PURPLE = '\033[95m'
    CYAN = '\033[96m'
@@ -127,8 +125,6 @@ def send_in_bulk(msg_list):
 async def main() -> None:
     """The main function that runs in the loop."""
 
-    global isBusFree
-
     messagesReceived=0
 
     reader = can.AsyncBufferedReader()
@@ -202,10 +198,8 @@ async def main() -> None:
             message_list.append(msg)
             messagesReceived+=1
 
-        if isBusFree and messagesReceived == 5:
-            isBusFree = False
+        if messagesReceived == 5:
             send_in_bulk(message_list)
-            isBusFree = True
             messagesReceived=0
             message_list=[]
 
