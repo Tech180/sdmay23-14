@@ -37,7 +37,7 @@ t1=1 #temp counter value for vcan1
 #-----------------------------------------------------------------------------------
 
 #-------------CAN DATA FRAMES
-data_msg0=[] #to be sent to vcan0
+data_msg2=[] #to be sent to vcan0
 data_msg1=[] #to be sent to vcan1
 #----------------------------
 
@@ -48,10 +48,10 @@ c = cmac.CMAC(algorithms.AES(Sx))
 
 #------------------------------------------------------------CAN BUS Vars
 bustype = 'socketcan'
-bus0 = ''              # bus0 connection (for port0)
+bus2 = ''              # bus2 connection (for port0)
 bus1 = ''              # bus1 connection (for port1)
 # globals set by command line arguments (w/ default, if any)
-port0 = 'vcan0'
+port2 = 'vcan2'
 port1 = 'vcan1'
 filename = 'debug.txt'
 verbose = False
@@ -64,7 +64,7 @@ usage = """
 -v                         verbose output to show port values being used
 if -o / --out is not specified then no file is created.
 default: --port0 {0} --port1 {1} 
-""".format(port0, port1)
+""".format(port2, port1)
 #----------------------------------------------------------------------------
 
 #------------------------------------------------Everything below this line is for receiving on vcan0 and sending to vcan1
@@ -139,7 +139,7 @@ def finalize_send_message_vcan1():
   data_msg1=[]
   t1+=1             
 #---------------------------------------------------------------------------------------------------------------------------
-def fwd_0to1(msg: can.Message) -> None: # pushes message to vcan0 will be a regular CAN message
+def fwd_2to1(msg: can.Message) -> None: # pushes message to vcan0 will be a regular CAN message
     global bus1
     print_message(msg)
     on_get_message(msg)
@@ -221,26 +221,26 @@ def validate_counter(msg):
     return True
 
 def unpack_FD_frame(msg):
-    global data_msg0 
+    global data_msg2 
 
     for i in range(0,55, 11):
-        data_msg0="".join(format(x, '02x') for x in msg.data[i:i+11]).upper() # 0-11, 11-22, 22-33, 33-44, 44-55
-        arbitration_ID = data_msg0[0:6]
-        data_msg0=data_msg0[6:]
-        data_msg2=[int(data_msg0[0:2], 16), int(data_msg0[2:4], 16), int(data_msg0[4:6], 16), int(data_msg0[6:8], 16), int(data_msg0[8:10], 16), int(data_msg0[10:12], 16), int(data_msg0[12:14], 16), int(data_msg0[14:], 16)]
+        data_msg2="".join(format(x, '02x') for x in msg.data[i:i+11]).upper() # 0-11, 11-22, 22-33, 33-44, 44-55
+        arbitration_ID = data_msg2[0:6]
+        data_msg2=data_msg2[6:]
+        data_msg0=[int(data_msg2[0:2], 16), int(data_msg2[2:4], 16), int(data_msg2[4:6], 16), int(data_msg2[6:8], 16), int(data_msg2[8:10], 16), int(data_msg2[10:12], 16), int(data_msg2[12:14], 16), int(data_msg2[14:], 16)]
         
-        msg2 = can.Message(arbitration_id=int(arbitration_ID,16), data=data_msg2, is_extended_id=True)
-        bus0.send(msg2)
+        msg0 = can.Message(arbitration_id=int(arbitration_ID,16), data=data_msg0, is_extended_id=True)
+        bus2.send(msg0)
 
-def fwd_1to0(msg: can.Message) -> None: # pushes message to vcan1 will be an FD message
-    global bus0
+def fwd_1to2(msg: can.Message) -> None: # pushes message to vcan1 will be an FD message
+    global bus2
     deconstruct_messages(msg)
 
 async def main() -> None:
     """The main function that runs in the loop."""
-    global bus0, bus1
+    global bus2, bus1
 
-    bus0 = can.Bus(interface="socketcan", channel=port0) 
+    bus2 = can.Bus(interface="socketcan", channel=port2) 
     bus1 = can.Bus(interface="socketcan", channel=port1, fd=True)
 
     # port1 listeners ..............................................
@@ -249,16 +249,16 @@ async def main() -> None:
     # Listeners are explained in [rtd]/listeners.html
     listeners1: List[MessageRecipient] = [
         reader1,        # AsyncBufferedReader() listener
-        fwd_1to0,       # Callback function
+        fwd_1to2,       # Callback function
     ]
 
     # port0 listeners ..............................................
-    reader0 = can.AsyncBufferedReader()
+    reader2 = can.AsyncBufferedReader()
 
     # Listeners are explained in [rtd]/listeners.html
-    listeners0: List[MessageRecipient] = [
-        reader0,        # AsyncBufferedReader() listener
-        fwd_0to1,       # Callback function
+    listeners2: List[MessageRecipient] = [
+        reader2,        # AsyncBufferedReader() listener
+        fwd_2to1,       # Callback function
     ]
     
     # Create Notifier with an explicit loop to use for scheduling of callbacks
@@ -267,10 +267,10 @@ async def main() -> None:
     #   them to listeners. [rtd]/api.html#notifier
     loop1 = asyncio.get_running_loop()
     notifier1 = can.Notifier(bus1, listeners1, loop=loop1)
-    loop0 = asyncio.get_running_loop()
-    notifier0 = can.Notifier(bus0, listeners0, loop=loop0)
+    loop2 = asyncio.get_running_loop()
+    notifier2 = can.Notifier(bus2, listeners2, loop=loop2)
 
-    print("forwarding between %s and %s" %(port0, port1))
+    print("forwarding between %s and %s" %(port2, port1))
     print(" ")
     print("use 'cansniffer' on either or both vcan networks to watch traffic")
     print("..........")
@@ -278,9 +278,9 @@ async def main() -> None:
     while True:
         # Wait for next message from AsyncBufferedReader
         msg1 = await reader1.get_message()
-        msg0 = await reader0.get_message()
+        msg2 = await reader2.get_message()
     # Clean-up
-    notifier0.stop()
+    notifier2.stop()
     notifier1.stop()
 
 if __name__ == "__main__":
