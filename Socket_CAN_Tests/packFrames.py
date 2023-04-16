@@ -33,8 +33,9 @@ def fwd_1to0(msg: can.Message) -> None:
 #two ways to do time: 1) using timestamps from file, 2) using can-utils that uses time stamps from file for us
 #   could have reading on vcan0 while writing on vcan1 
 async def main() -> None:
-    data_msg=[]
+    
     lineCount = 1 #inFuture: convert to bytes to use as freshness value
+    data_msg=[]
     t=1 #temp value each time to be stored / updating the montonic value's current byte
     currentMonotonicCounter = [0, 0, 0, 0, 0] #each value holds 1 byte or up to 255
     Sx = bytes.fromhex("00000000111111112222222233333333") #key
@@ -100,16 +101,13 @@ async def main() -> None:
             data_msg.append(int(pgn_1, 16))
             data_msg.append(int(pgn_2, 16))
             data_msg.append(int(source_address, 16))
-            
-
             madeReadable="".join(format(x, '02x') for x in msg.data).upper()
             for i in range(0,15,2):
                 data_msg.append(int(madeReadable[i:i+2],16)) # 8 bytes of data to be added to the list
             test += madeReadable
-                
             testToBytes = bytes(test, 'utf-8')
             c.update(testToBytes)
-
+# ----------------------------------------------------------------- Everything above this line is modularized
             #Packing frames into FD frames
             if lineCount % 5 == 0: 
                 counterInHex = hex(t).replace('0x', '')     
@@ -138,16 +136,9 @@ async def main() -> None:
                 msg = can.Message(arbitration_id=0xabc123, data=data_msg, is_extended_id=True, is_fd=True) #function call involving can library to format it properly into a sendable canfd message for vcan0
                 print(msg)
                 bus.send(msg)
-                if (msg==None):
-                    print("Message is empty")
-                asyncio.sleep(5)
-
                 data_msg=[]
-                t+=1
-                
+                t+=1             
             lineCount+=1
-            if lineCount == 25: 
-                asyncio.sleep(1)
-
+# ----------------------------------------------------------------- Everything above this line is modularized
 if __name__ == "__main__":
     asyncio.run(main())

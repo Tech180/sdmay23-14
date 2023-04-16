@@ -4,13 +4,13 @@ from cryptography.hazmat.primitives import cmac
 from cryptography.hazmat.primitives.ciphers import algorithms
 
 bustype = 'socketcan'
-channel_0 = 'vcan0'
+channel_2 = 'vcan2'
 
-timeBus = can.interfaces.socketcan.SocketcanBus(channel=channel_0) #setting bus 
+timeBus = can.interfaces.socketcan.SocketcanBus(channel=channel_2) #setting bus 
 
 data_msg=[]
 
-f = open("vcan2_CAN_frames.txt")
+f = open("vcan0_CAN_frames.txt")
 
 previous_time = 0
 
